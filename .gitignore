@@ -204,6 +204,6 @@ $RECYCLE.BIN/
 
 
 #secret
-C:\STS4_Workspace\project\src\main\resources\application-secret.properties
+src/main/resources/application-secret.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/git,windows,java,eclipse,maven,react
