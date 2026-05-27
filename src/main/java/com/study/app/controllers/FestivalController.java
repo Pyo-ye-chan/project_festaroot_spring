@@ -32,8 +32,8 @@ public class FestivalController {
 			@RequestParam Double lng,
 			@RequestParam(defaultValue = "5000") Integer radius,
 			@RequestParam(required = false, defaultValue = "") String contentTypeId) {
-		System.out.println("프론트가 준 값 -> lat: " + lat + ", lng: " + lng + ", radius: " + radius + 
-				", contenttypeid :" + contentTypeId);
+//		System.out.println("프론트가 준 값 -> lat: " + lat + ", lng: " + lng + ", radius: " + radius + 
+//				", contenttypeid :" + contentTypeId);
 		List<NearbyPlaceDTO> list = feServ.getNearbyPlaces(lat, lng, radius, contentTypeId);
 		
 		for(NearbyPlaceDTO dto : list) {

@@ -106,14 +106,14 @@ public class FestivalService {
 
             // 7. 데이터가 여러 개여서 '배열(Array)' 구조로 들어온 경우 파싱
             if (itemNode.isArray()) {
-            		System.out.println("배열 - 리스트");
+            		//System.out.println("배열 - 리스트");
                 for (JsonNode item : itemNode) {
                     list.add(parseItemToDTO(item));
                 }
             } 
             // 8. 데이터가 단 1개만 잡혀서 '객체(Object)' 구조로 들어온 경우 파싱 (★고질병 방어)
             else if (itemNode.isObject()) {
-            	System.out.println("객체 - 리스트");
+            //	System.out.println("객체 - 리스트");
                 list.add(parseItemToDTO(itemNode));
             } else {
                 System.err.println("❌ [TourAPI 에러] 알 수 없는 item 노드 포맷입니다.");
