@@ -13,8 +13,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.app.dao.FestivalDAO;
+import com.study.app.dto.CommonDetailDTO;
+import com.study.app.dto.EventPlaceDTO;
 import com.study.app.dto.FestivalDTO;
+import com.study.app.dto.FoodPlaceDTO;
 import com.study.app.dto.NearbyPlaceDTO;
+import com.study.app.dto.PlaceDetailResponse;
+import com.study.app.dto.TourPlaceDTO;
 
 @Service
 public class FestivalService {
@@ -35,6 +40,141 @@ public class FestivalService {
 	public FestivalDTO selectByContentId(String contentId) {
 		return fdao.selectByContentId(contentId);
 	}
+	
+	/**
+     * 한국관광공사 TourAPI (detailCommon2) 호출하여 공통 상세 정보를 가져옵니다.
+     */
+    public CommonDetailDTO getCommonDetail(String contentId) {
+        try {
+            URI uri = UriComponentsBuilder
+                    .fromUriString("https://apis.data.go.kr/B551011/KorService2/detailCommon2")
+                    .queryParam("serviceKey", serviceKey)
+                    .queryParam("MobileOS", "ETC")
+                    .queryParam("MobileApp", "AppTest")
+                    .queryParam("_type", "json")
+                    .queryParam("contentId", contentId)
+                    //.queryParam("defaultYN", "Y")
+                    //.queryParam("firstImageYN", "Y")
+                    //.queryParam("addrinfoYN", "Y")
+                    //.queryParam("overviewYN", "Y")
+                    .build(true)
+                    .toUri();
+
+            System.out.println(">>> [CommonDetail] Request URI: " + uri);
+            String response = restTemplate.getForObject(uri, String.class);
+            System.out.println(">>> [CommonDetail] Raw Response: " + response);
+
+            if (response == null || response.trim().startsWith("<")) {
+                System.err.println("❌ [TourAPI 에러] 유효하지 않은 응답입니다 (Common).");
+                return null;
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(response);
+            JsonNode itemNode = root.path("response").path("body").path("items").path("item");
+
+            if (itemNode.isMissingNode() || (itemNode.isTextual() && itemNode.asText().equals(""))) return null;
+
+            JsonNode data = itemNode.isArray() ? itemNode.get(0) : itemNode;
+
+            CommonDetailDTO dto = new CommonDetailDTO();
+            dto.setOverview(data.path("overview").asText());
+            dto.setHomepage(data.path("homepage").asText());
+            dto.setTel(data.path("tel").asText());
+            dto.setTelname(data.path("telname").asText());
+            dto.setZipcode(data.path("zipcode").asText());
+            dto.setFirstimage2(data.path("firstimage2").asText());
+
+            return dto;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+	/**
+     * 한국관광공사 TourAPI (detailIntro2) 호출하여 상세 정보(소개 정보)를 가져옵니다.
+     * contentTypeId에 따라 반환되는 DTO 타입이 달라집니다.
+     */
+    @SuppressWarnings("unchecked")
+    public <T> PlaceDetailResponse<T> getPlaceDetail(String contentId, String contentTypeId) {
+        try {
+            // 1. 공통 정보 가져오기
+            CommonDetailDTO commonInfo = getCommonDetail(contentId);
+
+            // 2. 특정 상세 정보 (detailIntro2) 가져오기
+            URI uri = UriComponentsBuilder
+                    .fromUriString("https://apis.data.go.kr/B551011/KorService2/detailIntro2")
+                    .queryParam("serviceKey", serviceKey)
+                    .queryParam("MobileOS", "ETC")
+                    .queryParam("MobileApp", "AppTest")
+                    .queryParam("_type", "json")
+                    .queryParam("contentId", contentId)
+                    .queryParam("contentTypeId", contentTypeId)
+                    .build(true)
+                    .toUri();
+
+            System.out.println(">>> [SpecificDetail] Request URI: " + uri);
+            String response = restTemplate.getForObject(uri, String.class);
+            System.out.println(">>> [SpecificDetail] Raw Response: " + response);
+
+            if (response == null || response.trim().startsWith("<")) {
+                System.err.println("❌ [TourAPI 에러] 유효하지 않은 응답입니다 (Intro).");
+                return new PlaceDetailResponse<>(commonInfo, null);
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(response);
+            JsonNode itemNode = root.path("response").path("body").path("items").path("item");
+
+            T specificInfo = null;
+            if (!itemNode.isMissingNode() && !(itemNode.isTextual() && itemNode.asText().equals(""))) {
+                JsonNode data = itemNode.isArray() ? itemNode.get(0) : itemNode;
+
+                if ("39".equals(contentTypeId)) { // 음식점
+                    FoodPlaceDTO dto = new FoodPlaceDTO();
+                    dto.setFirstmenu(data.path("firstmenu").asText());
+                    dto.setTreatmenu(data.path("treatmenu").asText());
+                    dto.setOpentimefood(data.path("opentimefood").asText());
+                    dto.setRestdatefood(data.path("restdatefood").asText());
+                    dto.setInfocenterfood(data.path("infocenterfood").asText());
+                    specificInfo = (T) dto;
+                } else if ("12".equals(contentTypeId)) { // 관광지
+                    TourPlaceDTO dto = new TourPlaceDTO();
+                    dto.setUsetime(data.path("usetime").asText());
+                    dto.setRestdate(data.path("restdate").asText());
+                    dto.setInfocenter(data.path("infocenter").asText());
+                    dto.setParking(data.path("parking").asText());
+                    dto.setChkpet(data.path("chkpet").asText());
+                    dto.setChkbabycarriage(data.path("chkbabycarriage").asText());
+                    dto.setExpguide(data.path("expguide").asText());
+                    dto.setExpagerange(data.path("expagerange").asText());
+                    specificInfo = (T) dto;
+                } else if ("15".equals(contentTypeId)) { // 행사/축제
+                    EventPlaceDTO dto = new EventPlaceDTO();
+                    dto.setEventstartdate(data.path("eventstartdate").asText());
+                    dto.setEventenddate(data.path("eventenddate").asText());
+                    dto.setEventplace(data.path("eventplace").asText());
+                    dto.setUsefee(data.path("usefee").asText());
+                    dto.setProgram(data.path("program").asText());
+                    dto.setPlaytime(data.path("playtime").asText());
+                    dto.setSpendtimefestival(data.path("spendtimefestival").asText());
+                    dto.setAgelimit(data.path("agelimit").asText());
+                    dto.setBookingplace(data.path("bookingplace").asText());
+                    dto.setDiscountinfofestival(data.path("discountinfofestival").asText());
+                    dto.setSponsor1(data.path("sponsor1").asText());
+                    dto.setSponsor1tel(data.path("sponsor1tel").asText());
+                    specificInfo = (T) dto;
+                }
+            }
+
+            return new PlaceDetailResponse<>(commonInfo, specificInfo);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 	public List<NearbyPlaceDTO> getNearbyPlaces(Double lat, Double lng, Integer radius, String contentTypeId) {
 		List<NearbyPlaceDTO> list = new ArrayList<>();
