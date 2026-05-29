@@ -72,6 +72,9 @@ public class FestivalController {
 
 		return ResponseEntity.ok(dto);
 	}
+	
+	// 축제 검색 > 축제 목록 보기
+	
 
 }
 
