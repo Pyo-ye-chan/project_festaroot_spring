@@ -1,6 +1,7 @@
-package com.study.app.services;
+package com.study.app.domains.festival;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +13,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.study.app.dao.FestivalDAO;
-import com.study.app.dto.CommonDetailDTO;
-import com.study.app.dto.EventPlaceDTO;
-import com.study.app.dto.FestivalDTO;
-import com.study.app.dto.FoodPlaceDTO;
-import com.study.app.dto.NearbyPlaceDTO;
-import com.study.app.dto.PlaceDetailResponse;
-import com.study.app.dto.TourPlaceDTO;
+import com.study.app.domains.festival.dto.CommonDetailDTO;
+import com.study.app.domains.festival.dto.EventPlaceDTO;
+import com.study.app.domains.festival.dto.FestivalDTO;
+import com.study.app.domains.festival.dto.FoodPlaceDTO;
+import com.study.app.domains.festival.dto.NearbyPlaceDTO;
+import com.study.app.domains.festival.dto.PlaceDetailResponse;
+import com.study.app.domains.festival.dto.TourPlaceDTO;
 
 @Service
 public class FestivalService {
@@ -278,72 +278,89 @@ public class FestivalService {
 	// festival 정보를 DB에 저장하는 메서드
 	public void saveFestivalInfoFromApi() {
 		try {
-			// 관광공사 축제 목록 API 주소(searchFestival2) 조립
-			URI uri = UriComponentsBuilder.fromUriString("https://apis.data.go.kr/B551011/KorService2/searchFestival2")
-					.queryParam("serviceKey", serviceKey)
-					.queryParam("MobileOS", "ETC")
-					.queryParam("MobileApp", "AppTest")
-					.queryParam("_type", "json")
-					.queryParam("numOfRows", 100) // 한 번에 조회되는 값
-					.queryParam("eventStartDate", "20260101") // 데이터 값을 가져올 기준 날짜
-					.build(true).toUri();
-
-			String response = restTemplate.getForObject(uri, String.class); // API 호출
+			// 동적으로 현재 연도 구하기 (예: 2026년이면 2026이 담김)
+	        int currentYear = LocalDate.now().getYear();
+	        String startDate = currentYear + "0101"; // "20260101" 형태로 문자열 조립
 			
-			// API 내용 확인 > JSON
-			System.out.println(">>> [공공 API 응답] : " + response);
+			int numOfRows = 100; // 한 페이지에 가져올 양 변수 지정
+			int totalPages = 1; // 최소 1페이지로 변수 지정
 
-			// 잭슨 라이브러리로 item 까지 들어가기
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode root = mapper.readTree(response); // 파싱
-			JsonNode itemNode = root.path("response").path("body").path("items").path("item");
-			
-			// itemNode의 타입 확인하기 > ARRAY
-			System.out.println(">>>> [itemNode 타입]: " + itemNode.getNodeType());
+			for (int i = 1; i <= totalPages; i++) { // totalPages 수와 동일해질 때 까지 반복문
+				// 관광공사 축제 목록 API 주소(searchFestival2) 조립
+				URI uri = UriComponentsBuilder
+						.fromUriString("https://apis.data.go.kr/B551011/KorService2/searchFestival2")
+						.queryParam("serviceKey", serviceKey).queryParam("MobileOS", "ETC")
+						.queryParam("MobileApp", "AppTest").queryParam("_type", "json")
+						.queryParam("numOfRows", numOfRows) // 한 번에 조회되는 값
+						.queryParam("pageNo", i) // 100개씩 페이지 나눌것임. 1페이지부터 시작. 두번째 반복문 때 i 반영됨.
+						.queryParam("eventStartDate", startDate) // 데이터 값을 가져올 기준 날짜
+						.build(true).toUri();
 
-			if (itemNode.isArray()) { // boolean으로 배열인지 확인
-				for (JsonNode item : itemNode) {
-					// FestivalDTO에 item에서 꺼낸 값 담기
-					FestivalDTO dto = new FestivalDTO();
+				String response = restTemplate.getForObject(uri, String.class); // API 호출
 
-					dto.setContent_id(item.path("contentid").asLong()); // api에서 contentid 꺼내오고 dto에 설정한 Long형으로 받기
-					dto.setTitle(item.path("title").asText()); // 축제명
-					dto.setAddr1(item.path("addr1").asText());
-					dto.setAddr2(item.path("addr2").asText());
-					
-					//NOT NULL 값 0으로 처리
-					String areaCode = item.path("areacode").asText(); // 지역 코드
-					dto.setRegion_code(areaCode.isEmpty() ? "0" : areaCode); // 만약 가리키는 값이 비어있다면 "0", 있으면 그대로 쓰기
-					
-					String sigunguCode = item.path("sigungucode").asText(); // 시군구
-					dto.setSigungu_code(sigunguCode.isEmpty() ? "0" : sigunguCode);
-					
-					dto.setFirst_image(item.path("firstimage").asText()); // 대표 이미지
-					dto.setFirst_image2(item.path("firstimage2").asText()); // 썸네일 이미지
-					dto.setMap_x(item.path("mapx").asDouble()); // 경도
-					dto.setMap_y(item.path("mapy").asDouble()); // 위도
-					dto.setMap_level(item.path("mlevel").asInt());
-					dto.setEvent_start_date(item.path("eventstartdate").asText()); // 행사 시작일
-					dto.setEvent_end_date(item.path("eventenddate").asText()); // 행사 종료일
+				// API 내용 확인 > JSON
+				//System.out.println(">>> [공공 API 응답] : " + response); // 길어서 주석처리함.
 
-					// overview, sponplace, usetimefestival, sponsor1tel, hompage 는 상세를 눌렀을때 담기도록
-					// 메서드 만들어야함.
+				// 잭슨 라이브러리로 item 까지 들어가기
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode root = mapper.readTree(response); // 파싱
+				JsonNode itemNode = root.path("response").path("body").path("items").path("item");
 
-					dto.setCreated_time(item.path("createdtime").asText()); // 축제 등록일
-					dto.setModified_time(item.path("modifiedtime").asText()); // 축제 수정일
-					
-					// festivalDAO 호출 : 값을 가져온 범위 내에서 이미 값이 있으면 update, 없으면 insert
-					fdao.upsertFestival(dto); // api 값 담은 dto 전달
-					
+				// itemNode의 타입 확인하기 > ARRAY
+				//System.out.println(">>>> [itemNode 타입]: " + itemNode.getNodeType());
+
+				
+				if(i == 1) { // 처음 이 for문을 돌 때, 전체 데이터 수와 페이지 수 계산
+					// root에서 totalCount int로 총 데이터 수 뽑기
+					int totalCount = root.path("response").path("body").path("totalCount").asInt();
+
+					// 총 데이터 수와 한 페이지 수로 '총 페이지 수' 계산하기
+					totalPages = (int) Math.ceil((double) totalCount / numOfRows);
+					System.out.println("총 데이터 수 : " + totalCount + ", 총 페이지 수 : " + totalPages);
 				}
+			
+				if (itemNode.isArray()) { // boolean으로 배열인지 확인
+					for (JsonNode item : itemNode) {
+						// FestivalDTO에 item에서 꺼낸 값 담기
+						FestivalDTO dto = new FestivalDTO();
 
-			}
+						dto.setContent_id(item.path("contentid").asLong()); // api에서 contentid 꺼내오고 dto에 설정한 Long형으로 받기
+						dto.setTitle(item.path("title").asText()); // 축제명
+						dto.setAddr1(item.path("addr1").asText());
+						dto.setAddr2(item.path("addr2").asText());
+
+						// NOT NULL 값 0으로 처리
+						String areaCode = item.path("areacode").asText(); // 지역 코드
+						dto.setRegion_code(areaCode.isEmpty() ? "0" : areaCode); // 만약 가리키는 값이 비어있다면 "0", 있으면 그대로 쓰기
+
+						String sigunguCode = item.path("sigungucode").asText(); // 시군구
+						dto.setSigungu_code(sigunguCode.isEmpty() ? "0" : sigunguCode);
+
+						dto.setFirst_image(item.path("firstimage").asText()); // 대표 이미지
+						dto.setFirst_image2(item.path("firstimage2").asText()); // 썸네일 이미지
+						dto.setMap_x(item.path("mapx").asDouble()); // 경도
+						dto.setMap_y(item.path("mapy").asDouble()); // 위도
+						dto.setMap_level(item.path("mlevel").asInt());
+						dto.setEvent_start_date(item.path("eventstartdate").asText()); // 행사 시작일
+						dto.setEvent_end_date(item.path("eventenddate").asText()); // 행사 종료일
+
+						// overview, sponplace, usetimefestival, sponsor1tel, hompage 는 상세를 눌렀을때 담기도록
+						// 메서드 만들어야함.
+
+						dto.setCreated_time(item.path("createdtime").asText()); // 축제 등록일
+						dto.setModified_time(item.path("modifiedtime").asText()); // 축제 수정일
+
+						// festivalDAO 호출 : 값을 가져온 범위 내에서 이미 값이 있으면 update, 없으면 insert
+						fdao.upsertFestival(dto); // api 값 담은 dto 전달
+					}
+				}
+				// 현재 저장된 진행 상황
+				System.out.println("[동기화 된 페이지] " + i + " / " + totalPages + " 페이지 저장 완료 (" + itemNode.size() + "개 항목)");
+			} // for 문 끝
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("관광공사 데이터 동기화 실패", e);
 		}
 	}
-	
-	
 
 }

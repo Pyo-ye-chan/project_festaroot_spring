@@ -1,4 +1,4 @@
-package com.study.app.dao;
+package com.study.app.domains.festival;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.study.app.dto.FestivalDTO;
+import com.study.app.domains.festival.dto.FestivalDTO;
 
 @Repository
 public class FestivalDAO {

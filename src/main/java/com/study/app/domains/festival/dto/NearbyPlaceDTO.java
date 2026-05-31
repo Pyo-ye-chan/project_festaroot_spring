@@ -1,4 +1,4 @@
-package com.study.app.dto;
+package com.study.app.domains.festival.dto;
 
 /**
  * 한국관광공사 Open API 주변 관광 정보 데이터를 담는 DTO

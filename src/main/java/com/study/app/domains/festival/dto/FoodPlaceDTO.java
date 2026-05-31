@@ -1,4 +1,4 @@
-package com.study.app.dto;
+package com.study.app.domains.festival.dto;
 
 public class FoodPlaceDTO {
 	
