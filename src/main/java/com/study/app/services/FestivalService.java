@@ -284,15 +284,22 @@ public class FestivalService {
 					.queryParam("MobileOS", "ETC")
 					.queryParam("MobileApp", "AppTest")
 					.queryParam("_type", "json")
-					.queryParam("numOfRows", 100) // 한 번에
+					.queryParam("numOfRows", 100) // 한 번에 조회되는 값
+					.queryParam("eventStartDate", "20260101") // 데이터 값을 가져올 기준 날짜
 					.build(true).toUri();
 
 			String response = restTemplate.getForObject(uri, String.class); // API 호출
+			
+			// API 내용 확인 > JSON
+			System.out.println(">>> [공공 API 응답] : " + response);
 
 			// 잭슨 라이브러리로 item 까지 들어가기
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(response); // 파싱
 			JsonNode itemNode = root.path("response").path("body").path("items").path("item");
+			
+			// itemNode의 타입 확인하기 > ARRAY
+			System.out.println(">>>> [itemNode 타입]: " + itemNode.getNodeType());
 
 			if (itemNode.isArray()) { // boolean으로 배열인지 확인
 				for (JsonNode item : itemNode) {
@@ -303,8 +310,14 @@ public class FestivalService {
 					dto.setTitle(item.path("title").asText()); // 축제명
 					dto.setAddr1(item.path("addr1").asText());
 					dto.setAddr2(item.path("addr2").asText());
-					dto.setRegion_code(item.path("areacode").asText()); // 지역 코드
-					dto.setSigungu_code(item.path("sigungucode").asText()); // 시군구
+					
+					//NOT NULL 값 0으로 처리
+					String areaCode = item.path("areacode").asText(); // 지역 코드
+					dto.setRegion_code(areaCode.isEmpty() ? "0" : areaCode); // 만약 가리키는 값이 비어있다면 "0", 있으면 그대로 쓰기
+					
+					String sigunguCode = item.path("sigungucode").asText(); // 시군구
+					dto.setSigungu_code(sigunguCode.isEmpty() ? "0" : sigunguCode);
+					
 					dto.setFirst_image(item.path("firstimage").asText()); // 대표 이미지
 					dto.setFirst_image2(item.path("firstimage2").asText()); // 썸네일 이미지
 					dto.setMap_x(item.path("mapx").asDouble()); // 경도
@@ -318,10 +331,10 @@ public class FestivalService {
 
 					dto.setCreated_time(item.path("createdtime").asText()); // 축제 등록일
 					dto.setModified_time(item.path("modifiedtime").asText()); // 축제 수정일
-
-					// festivalDAO 호출 : 이미 값이 있으면 update, 없으면 insert
+					
+					// festivalDAO 호출 : 값을 가져온 범위 내에서 이미 값이 있으면 update, 없으면 insert
 					fdao.upsertFestival(dto); // api 값 담은 dto 전달
-
+					
 				}
 
 			}
@@ -330,6 +343,7 @@ public class FestivalService {
 			throw new RuntimeException("관광공사 데이터 동기화 실패", e);
 		}
 	}
+	
 	
 
 }
