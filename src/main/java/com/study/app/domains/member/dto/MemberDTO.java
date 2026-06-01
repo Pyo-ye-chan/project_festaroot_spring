@@ -1,4 +1,4 @@
-package com.study.app.dto;
+package com.study.app.domains.member.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

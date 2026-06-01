@@ -1,4 +1,4 @@
-package com.study.app.controllers;
+package com.study.app.domains.oauth;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.study.app.services.AuthService;
+import com.study.app.domains.auth.AuthService;
 
 
 @RestController

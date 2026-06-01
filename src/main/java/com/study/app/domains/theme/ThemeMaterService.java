@@ -1,12 +1,9 @@
-package com.study.app.services;
+package com.study.app.domains.theme;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.study.app.dao.ThemeMasterDAO;
-import com.study.app.dto.ThemeMasterDTO;
 
 @Service
 public class ThemeMaterService {

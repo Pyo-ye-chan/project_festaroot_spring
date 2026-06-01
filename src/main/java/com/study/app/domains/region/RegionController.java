@@ -1,4 +1,4 @@
-package com.study.app.controllers;
+package com.study.app.domains.region;
 
 import java.util.List;
 
@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.study.app.dto.RegionMasterDTO;
-import com.study.app.services.RegionMasterService;
 
 @RestController
 @RequestMapping("/region")

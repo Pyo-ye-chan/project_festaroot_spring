@@ -1,4 +1,4 @@
-package com.study.app.controllers;
+package com.study.app.domains.auth;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.study.app.dto.LoginDTO;
-import com.study.app.services.AuthService;
+import com.study.app.domains.auth.dto.LoginDTO;
 
 @RestController
 @RequestMapping("/auth")

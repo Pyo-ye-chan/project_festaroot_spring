@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.study.app.dao.AuthDAO">
+<mapper namespace="com.study.app.domains.auth.AuthDAO">
 	
-	<select id="selectMemberById" parameterType="string" resultType="com.study.app.dto.MemberDTO">
+	<select id="selectMemberById" parameterType="string" resultType="com.study.app.domains.member.dto.MemberDTO">
         SELECT
             MEMBER_ID, PASSWORD, NAME, NICKNAME, PHONE,
             EMAIL, BIRTHDATE, GENDER, ADDR_SIDO, ADDR_SIGUNGU,
@@ -14,31 +14,13 @@
         WHERE MEMBER_ID = #{member_id}
     </select>
     
-    <select id="selectMemberBySocialIdAndProvider" resultType="com.study.app.dto.MemberDTO">
-        SELECT
-            MEMBER_ID, PASSWORD, NAME, NICKNAME, PHONE,
-            EMAIL, BIRTHDATE, GENDER, ADDR_SIDO, ADDR_SIGUNGU,
-            RESIDE_AREA_CODE, RESIDE_SIGUNGU_CODE, PROFILE_IMAGE_URL, SOCIAL_PROVIDER, EXP_POINT,
-            TITLE_ID, CREATED_AT, SOCIAL_ID
-        FROM MEMBER
-        WHERE SOCIAL_ID = #{socialId} AND SOCIAL_PROVIDER = #{socialProvider}
+    <select id="selectMemberBySocialIdAndProvider" resultType="com.study.app.domains.member.dto.MemberDTO">
+           SELECT *
+		    FROM MEMBER
+		    WHERE SOCIAL_ID = #{socialId}
+	      AND SOCIAL_PROVIDER = #{socialProvider}
     </select>
     
-    <insert id="insertMember" parameterType="com.study.app.dto.MemberDTO">
-
-        INSERT INTO MEMBER (
-			MEMBER_ID, PASSWORD, NAME, NICKNAME, PHONE, 
-			EMAIL, BIRTHDATE, GENDER, ADDR_SIDO, ADDR_SIGUNGU, 
-			RESIDE_AREA_CODE, RESIDE_SIGUNGU_CODE, PROFILE_IMAGE_URL, SOCIAL_PROVIDER, EXP_POINT, 
-			TITLE_ID, CREATED_AT
-		) VALUES (
-			'kakao_' || MEMBER_SEQ.NEXTVAL, #{password}, #{name}, #{nickname}, #{phone}, 
-			#{email}, #{birthdate}, #{gender}, #{addr_sido}, #{addr_sigungu}, 
-			#{reside_area_code}, #{reside_sigungu_code}, #{profile_image_url}, 
-			COALESCE(#{social_provider}, 'LOCAL'), 0, 
-			#{title_id}, SYSDATE
-		)
-    </insert>
     
     
 

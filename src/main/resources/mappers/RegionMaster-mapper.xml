@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.study.app.dao.RegionMasterDAO">
+<mapper namespace="com.study.app.domains.region.RegionMasterDAO">
 
 <insert id="insertRegion" >
     INSERT INTO REGION_MASTER (
@@ -18,11 +18,11 @@
     )
 </insert>
 
-<select id="selectAllSido" resultType="com.study.app.dto.RegionMasterDTO">
+<select id="selectAllSido" resultType="com.study.app.domains.region.RegionMasterDTO">
     SELECT DISTINCT REGION_CODE, REGION_NAME FROM REGION_MASTER ORDER BY REGION_CODE
 </select>
 
-<select id="selectAllSigungu" resultType="com.study.app.dto.RegionMasterDTO">
+<select id="selectAllSigungu" resultType="com.study.app.domains.region.RegionMasterDTO">
     SELECT SIGUNGU_CODE, SIGUNGU_NAME FROM REGION_MASTER WHERE REGION_CODE = #{regionCode}
     ORDER BY SIGUNGU_CODE
 </select>

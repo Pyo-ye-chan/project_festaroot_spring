@@ -1,4 +1,4 @@
-package com.study.app.controllers;
+package com.study.app.domains.member;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -6,9 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.study.app.dto.MemberDTO;
-import com.study.app.dto.LoginDTO; // Import LoginDTO
-import com.study.app.services.MemberService;
+import com.study.app.domains.auth.dto.LoginDTO;
+import com.study.app.domains.member.dto.MemberDTO;
 
 @RestController
 @RequestMapping("/member")

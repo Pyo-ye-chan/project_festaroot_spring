@@ -1,12 +1,11 @@
-package com.study.app.services;
+package com.study.app.domains.member;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // Import BCryptPasswordEncoder
 
-import com.study.app.dao.MemberDAO;
-import com.study.app.dto.MemberDTO;
-import com.study.app.dto.LoginDTO;
+import com.study.app.domains.auth.dto.LoginDTO;
+import com.study.app.domains.member.dto.MemberDTO;
 import com.study.app.utils.JWTUtil;
 // import com.study.app.utils.EncryptionUtil; // Remove EncryptionUtil import
 
@@ -46,6 +45,7 @@ public class MemberService {
     	if(memberDTO.getTitle_id() == null) {
     	    memberDTO.setTitle_id(1L);
     	}
+    	
         return memberDAO.insertMember(memberDTO);
     }
 

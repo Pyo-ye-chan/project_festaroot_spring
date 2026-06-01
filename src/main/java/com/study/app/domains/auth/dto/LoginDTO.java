@@ -1,4 +1,4 @@
-package com.study.app.dto;
+package com.study.app.domains.auth.dto;
 
 public class LoginDTO {
     private String member_id;
