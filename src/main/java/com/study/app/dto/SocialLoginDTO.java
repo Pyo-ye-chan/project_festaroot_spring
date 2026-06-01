@@ -8,6 +8,7 @@ public class SocialLoginDTO {
     private String email;
     private String nickname;
     private String profile_image_url;
+    
 	public SocialLoginDTO(String social_provider, String social_id, String email, String nickname,
 			String profile_image_url) {
 		super();
