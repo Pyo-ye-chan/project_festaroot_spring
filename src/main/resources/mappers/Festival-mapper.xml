@@ -4,10 +4,69 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   <mapper namespace="Festival">
   
-  	<select id="getAll" resultType="com.study.app.dto.FestivalDTO">
+  	<select id="getAll" resultType="com.study.app.domains.festival.dto.FestivalDTO">
   		select * from festival_info
   	</select>
-  	<select id="selectByContentId" resultType="com.study.app.dto.FestivalDTO">
-  		select * from festival_info where content_id = ${content_id}
+  	
+  	<select id="selectByContentId" resultType="com.study.app.domains.festival.dto.FestivalDTO">
+  		select * from festival_info where content_id = #{content_id}
   	</select>
+  	
+	<!--축제 정보 update 또는 insert-->
+	<update id="upsertFestival" parameterType="com.study.app.domains.festival.dto.FestivalDTO">
+		merge into festival_info f
+		using dual
+		on (f.content_id = #{content_id}) 
+		
+		when matched then update set
+			f.title = #{title},
+			f.addr1 = #{addr1}, 
+			f.addr2 = #{addr2},
+			f.region_code = #{region_code},
+			f.sigungu_code = #{sigungu_code},
+			f.first_image = #{first_image},
+			f.first_image2 = #{first_image2},
+			f.map_x = #{map_x},
+			f.map_y = #{map_y},
+			f.map_level = #{map_level},
+			f.event_start_date = #{event_start_date},
+			f.event_end_date = #{event_end_date},
+			f.modified_time = #{modified_time}
+			
+		when not matched then insert (
+			content_id, 
+			title, 
+			addr1, 
+			addr2,
+			region_code, 
+			sigungu_code,
+			first_image,
+			first_image2,
+			map_x,
+			map_y,
+			map_level,
+			event_start_date,
+			event_end_date,
+			created_time, 
+			modified_time
+		)
+		values (
+			#{content_id}, 
+			#{title}, 
+			#{addr1},
+			#{addr2},  
+			#{region_code}, 
+			#{sigungu_code}, 
+			#{first_image},
+			#{first_image2},
+			#{map_x},
+			#{map_y},
+			#{map_level},
+			#{event_start_date},
+			#{event_end_date},
+			#{created_time}, 
+			#{modified_time}
+		)
+	</update>
+	
   </mapper>

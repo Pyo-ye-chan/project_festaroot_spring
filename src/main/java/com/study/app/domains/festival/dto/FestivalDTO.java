@@ -1,4 +1,4 @@
-package com.study.app.dto;
+package com.study.app.domains.festival.dto;
 
 public class FestivalDTO {
 	
@@ -42,6 +42,10 @@ public class FestivalDTO {
     private String sponsor1_tel;
     private String homepage;
     
+    // 축제 최초등록일 / 축제 수정일
+    private String created_time;
+    private String modified_time;
+    
     // 통계 및 정렬용 데이터 (기본값 0 대응)
     private Long view_count;
     private Long like_count;
@@ -51,12 +55,12 @@ public class FestivalDTO {
     private Double rating_avg;
     
     public FestivalDTO() {}
-
+    
 	public FestivalDTO(Long content_id, String title, String addr1, String addr2, String region_code,
 			String sigungu_code, String first_image, String first_image2, Double map_x, Double map_y, Integer map_level,
 			String event_start_date, String event_end_date, String overview, String spon_place,
-			String use_time_festival, String sponsor1_tel, String homepage, Long view_count, Long like_count,
-			Long review_count, Double rating_avg) {
+			String use_time_festival, String sponsor1_tel, String homepage, String created_time, String modified_time,
+			Long view_count, Long like_count, Long review_count, Double rating_avg) {
 		super();
 		this.content_id = content_id;
 		this.title = title;
@@ -76,6 +80,8 @@ public class FestivalDTO {
 		this.use_time_festival = use_time_festival;
 		this.sponsor1_tel = sponsor1_tel;
 		this.homepage = homepage;
+		this.created_time = created_time;
+		this.modified_time = modified_time;
 		this.view_count = view_count;
 		this.like_count = like_count;
 		this.review_count = review_count;
@@ -226,6 +232,22 @@ public class FestivalDTO {
 		this.homepage = homepage;
 	}
 
+	public String getCreated_time() {
+		return created_time;
+	}
+
+	public void setCreated_time(String created_time) {
+		this.created_time = created_time;
+	}
+
+	public String getModified_time() {
+		return modified_time;
+	}
+
+	public void setModified_time(String modified_time) {
+		this.modified_time = modified_time;
+	}
+
 	public Long getView_count() {
 		return view_count;
 	}
@@ -257,7 +279,8 @@ public class FestivalDTO {
 	public void setRating_avg(Double rating_avg) {
 		this.rating_avg = rating_avg;
 	}
-    
+
+
     
     
 }
