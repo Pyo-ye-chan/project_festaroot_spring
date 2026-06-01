@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.study.app.dao.RegionMasterDAO">
+
+<insert id="insertRegion" >
+    INSERT INTO REGION_MASTER (
+        REGION_CODE,
+        SIGUNGU_CODE,
+        REGION_NAME,
+        SIGUNGU_NAME
+    ) VALUES (
+        #{region_code},
+        #{sigungu_code},
+        #{region_name},
+        #{sigungu_name}
+    )
+</insert>
+
+<select id="selectAllSido" resultType="com.study.app.dto.RegionMasterDTO">
+    SELECT DISTINCT REGION_CODE, REGION_NAME FROM REGION_MASTER ORDER BY REGION_CODE
+</select>
+
+<select id="selectAllSigungu" resultType="com.study.app.dto.RegionMasterDTO">
+    SELECT SIGUNGU_CODE, SIGUNGU_NAME FROM REGION_MASTER WHERE REGION_CODE = #{regionCode}
+    ORDER BY SIGUNGU_CODE
+</select>
+
+
+
+</mapper>
