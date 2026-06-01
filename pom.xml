@@ -31,6 +31,13 @@
 		<spring-ai.version>2.0.0-M6</spring-ai.version>
 	</properties>
 	<dependencies>
+	
+		<dependency>
+		    <groupId>org.projectlombok</groupId>
+		    <artifactId>lombok</artifactId>
+		    <optional>true</optional>
+		</dependency>
+		
 		<dependency>
 	       <groupId>com.auth0</groupId>
 	       <artifactId>java-jwt</artifactId>
