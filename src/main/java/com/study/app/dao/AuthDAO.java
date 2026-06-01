@@ -10,5 +10,4 @@ import com.study.app.dto.MemberDTO;
 public interface AuthDAO {
     MemberDTO selectMemberById(String member_id);
     MemberDTO selectMemberBySocialIdAndProvider(@Param("socialId") String socialId, @Param("socialProvider") String socialProvider);
-    void insertMember(MemberDTO memberDTO);
 }

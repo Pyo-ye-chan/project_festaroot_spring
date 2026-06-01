@@ -68,6 +68,7 @@ public class AuthService {
         Map<String, Object> result = new HashMap<>();
 
         KakaoTokenResponse tokenResponse = getKakaoAccessToken(code);
+        
 
         if (tokenResponse == null || tokenResponse.getAccessToken() == null) {
             result.put("success", false);
@@ -154,69 +155,6 @@ public class AuthService {
         return response.getBody();
     }
 
-//    public String kakaoLogin(String code) {
-//        // 1. Get Access Token from Kakao
-//        KakaoTokenResponse tokenResponse = getKakaoAccessToken(code);
-//        if (tokenResponse == null) {
-//            return null; // Failed to get access token
-//        }
-//
-//        // 2. Get User Information from Kakao
-//        KakaoUserResponse userResponse = getKakaoUserInfo(tokenResponse.getAccessToken());
-//        if (userResponse == null) {
-//            return null; // Failed to get user info
-//        }
-//
-//        // 3. User Lookup/Registration
-//        String socialId = String.valueOf(userResponse.getId());
-//        String socialProvider = "KAKAO";
-//        
-//        MemberDTO member = authDAO.selectMemberBySocialIdAndProvider(socialId, socialProvider);
-//
-//        if (member == null) {
-//            // User does not exist, register new user
-//            member = registerKakaoUser(userResponse);
-//            if (member == null) {
-//                return null; // Failed to register user
-//            }
-//        }
-//
-//        // 4. Generate JWT
-//        return jwtUtil.createToken(member.getMember_id());
-//    }
-//
-//    private KakaoTokenResponse getKakaoAccessToken(String code) {
-//        String tokenUrl = "https://kauth.kakao.com/oauth/token";
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-//
-//
-//        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-//        params.add("grant_type", "authorization_code");
-//        params.add("client_id", kakaoClientId);
-//        params.add("redirect_uri", kakaoRedirectUri);
-//        params.add("code", code);
-//        // params.add("client_secret", kakaoClientSecret); // Uncomment if client_secret is required and enabled
-//
-//        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-//
-//        try {
-//            ResponseEntity<KakaoTokenResponse> response = restTemplate.postForEntity(tokenUrl, request, KakaoTokenResponse.class);
-//            if (response.getStatusCode() == HttpStatus.OK) {
-//                return response.getBody();
-//            }
-//        } catch (HttpClientErrorException e) {
-//            System.out.println("카카오 응답:");
-//            System.out.println(e.getResponseBodyAsString());
-//            throw e;
-//        }
-//        
-//
-//        
-//        
-//        return null;
-//    }
 
     private KakaoUserResponse getKakaoUserInfo(String accessToken) {
         String userInfoUrl = "https://kapi.kakao.com/v2/user/me";
@@ -241,57 +179,4 @@ public class AuthService {
         return null;
     }
 
-    private MemberDTO registerKakaoUser(KakaoUserResponse userResponse) {
-        try {
-            MemberDTO newMember = new MemberDTO();
-
-            String kakaoId = String.valueOf(userResponse.getId());
-
-            newMember.setMember_id("kakao_" + kakaoId);
-            newMember.setPassword(bCryptPasswordEncoder.encode(UUID.randomUUID().toString()));
-            newMember.setSocial_provider("KAKAO");
-            newMember.setSocial_id(kakaoId);
-
-            // 기본 임시값
-            newMember.setNickname("kakao_" + kakaoId);
-            newMember.setEmail("kakao_" + kakaoId + "@temp.festaroute.local");
-            
-
-            // 카카오에서 이메일이 있으면 사용
-            if (userResponse.getKakaoAccount() != null) {
-                if (userResponse.getKakaoAccount().getEmail() != null) {
-                    newMember.setEmail(userResponse.getKakaoAccount().getEmail());
-                }
-
-                if (userResponse.getKakaoAccount().getProfile() != null) {
-                    newMember.setProfile_image_url(
-                        userResponse.getKakaoAccount().getProfile().getProfileImageUrl()
-                    );
-                }
-            }
-
-            newMember.setName("카카오사용자");
-            newMember.setPhone("N/A");
-            newMember.setGender("M");
-            newMember.setBirthdate(LocalDate.of(1900, 1, 1));
-            newMember.setAddr_sido("N/A");
-            newMember.setAddr_sigungu("N/A");
-            newMember.setReside_area_code("N/A");
-            newMember.setReside_sigungu_code("N/A");
-            newMember.setProfile_image_url("N/A");
-
-            newMember.setExp_point(0L);
-            newMember.setTitle_id(1L);
-            newMember.setCreated_at(LocalDateTime.now());
-
-            authDAO.insertMember(newMember);
-
-            return newMember;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
 }

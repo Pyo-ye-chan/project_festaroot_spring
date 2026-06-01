@@ -46,6 +46,7 @@ public class MemberService {
     	if(memberDTO.getTitle_id() == null) {
     	    memberDTO.setTitle_id(1L);
     	}
+    	
         return memberDAO.insertMember(memberDTO);
     }
 
