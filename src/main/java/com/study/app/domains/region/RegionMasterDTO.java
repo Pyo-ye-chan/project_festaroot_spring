@@ -1,5 +1,6 @@
 package com.study.app.domains.region;
 
+// @Data
 public class RegionMasterDTO {
 	
 	private String region_code;
@@ -7,6 +8,15 @@ public class RegionMasterDTO {
 	private String region_name;
 	private String sigungu_name;
 	
+	// 클래스 위에 @Data 어노테이션 달면 Lombok 라이브러리가 아래 기본 코드들을 다 안보이게 생성해줌...
+	// 즉, 밑에 @Data 달면 아래에 코드 다 지워도 됨.
+	
+	@Override
+	public String toString() {
+		return "RegionMasterDTO [region_code=" + region_code + ", sigungu_code=" + sigungu_code + ", region_name="
+				+ region_name + ", sigungu_name=" + sigungu_name + "]";
+	}
+
 	public RegionMasterDTO() {}
 
 	public RegionMasterDTO(String region_code, String sigungu_code, String region_name, String sigungu_name) {

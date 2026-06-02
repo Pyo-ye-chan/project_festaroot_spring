@@ -334,11 +334,11 @@ public class FestivalService {
 						dto.setAddr2(item.path("addr2").asText());
 
 						// NOT NULL 값 0으로 처리
-						String areaCode = item.path("areacode").asText(); // 지역 코드
-						dto.setRegion_code(areaCode.isEmpty() ? "0" : areaCode); // 만약 가리키는 값이 비어있다면 "0", 있으면 그대로 쓰기
+						String lDongRegnCd = item.path("lDongRegnCd").asText(); // 지역 코드
+						dto.setRegion_code(lDongRegnCd.isEmpty() ? "0" : lDongRegnCd); // 만약 가리키는 값이 비어있다면 "0", 있으면 그대로 쓰기
 
-						String sigunguCode = item.path("sigungucode").asText(); // 시군구
-						dto.setSigungu_code(sigunguCode.isEmpty() ? "0" : sigunguCode);
+						String lDongSignguCd = item.path("lDongSignguCd").asText(); // 시군구
+						dto.setSigungu_code(lDongSignguCd.isEmpty() ? "0" : lDongSignguCd);
 
 						dto.setFirst_image(item.path("firstimage").asText()); // 대표 이미지
 						dto.setFirst_image2(item.path("firstimage2").asText()); // 썸네일 이미지

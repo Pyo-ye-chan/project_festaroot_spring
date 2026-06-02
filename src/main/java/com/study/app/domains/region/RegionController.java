@@ -10,29 +10,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/region")
-public class RegionController {  // http://localhost/region/sync 접속 시 DB 저장 실행
+public class RegionController {
 
 	@Autowired
-    private RegionMasterService regionMasterService;
+	private RegionMasterService regionMasterService;
 
-    public RegionController(RegionMasterService regionMasterService) {
-        this.regionMasterService = regionMasterService;
-    }
+	public RegionController(RegionMasterService regionMasterService) {
+		this.regionMasterService = regionMasterService;
+	}
 
-    @GetMapping("/sync")
-    public String sync() {
-        int count = regionMasterService.syncRegionCodes();
-        return "지역 코드 저장 완료: " + count + "건";
-    }
-    
-    @GetMapping("/sido")
-    public List<RegionMasterDTO> getSidoList() {
-        return regionMasterService.getSidoList();
-    }
+	@GetMapping("/sido")
+	public List<RegionMasterDTO> getSidoList() {
+		return regionMasterService.getSidoList();
+	}
 
-    @GetMapping("/sigungu")
-    public List<RegionMasterDTO> getSigunguList(@RequestParam String regionCode) {
-        return regionMasterService.getSigunguList(regionCode);
-    }
+	@GetMapping("/sigungu")
+	public List<RegionMasterDTO> getSigunguList(@RequestParam String regionCode) {
+		return regionMasterService.getSigunguList(regionCode);
+	}
 }
-
