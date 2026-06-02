@@ -467,20 +467,28 @@ public class FestivalService {
 	                .queryParam("contentId", contentId)
 
 	                // 15 = 축제/공연/행사
-	                .queryParam("contentTypeId", "15")
+	                // .queryParam("contentTypeId", "15")
 
 	                // 소개글 조회
-	                .queryParam("overviewYN", "Y")
+	                // .queryParam("overviewYN", "Y")
 
 	                // 기본정보 조회
 	                // title, tel, homepage 등 포함
-	                .queryParam("defaultYN", "Y")
+	                // .queryParam("defaultYN", "Y")
+	                
+	                
+	                // .queryParam("firstImageYN", "Y")
+
 
 	                .build(true)
 	                .toUri();
 
 	        // TourAPI 호출
 	        String response = restTemplate.getForObject(uri, String.class);
+	        
+	        System.out.println(response);
+	        
+
 
 	        // JSON 문자열 → JsonNode 변환
 	        JsonNode root = mapper.readTree(response);
@@ -493,6 +501,10 @@ public class FestivalService {
 
 	        // item이 배열 또는 객체로 반환될 수 있음
 	        JsonNode data = item.isArray() ? item.get(0) : item;
+	        
+	        System.out.println("overview = " + data.path("overview").asText());
+	        System.out.println("tel = " + data.path("tel").asText());
+	        System.out.println("homepage = " + data.path("homepage").asText());
 
 	        // 정상 데이터 존재 여부 확인
 	        if (data != null && !data.isMissingNode()) {
