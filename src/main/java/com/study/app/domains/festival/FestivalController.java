@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.study.app.domains.festival.dto.EventPlaceDTO;
+import com.study.app.domains.festival.dto.FestDetailDTO;
 import com.study.app.domains.festival.dto.FestivalDTO;
 import com.study.app.domains.festival.dto.FoodPlaceDTO;
 import com.study.app.domains.festival.dto.NearbyPlaceDTO;
@@ -93,6 +93,13 @@ public class FestivalController {
 //		List<FestivalDTO> list = feServ.searchFestivalKeyword();
 //		return ResponseEntity.ok(list);
 		return ResponseEntity.ok().build();
+	}
+	
+	// 축제 상세보기
+	@GetMapping("/detail/{contentId}")
+	public ResponseEntity<FestDetailDTO> getFestivalDetail(@PathVariable String contentId) {
+		FestDetailDTO dto = feServ.getFestivalDetail(contentId);
+		return ResponseEntity.ok(dto);
 	}
 
 }
