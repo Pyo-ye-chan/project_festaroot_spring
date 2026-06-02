@@ -12,7 +12,13 @@
   		select * from festival_info where content_id = #{content_id}
   	</select>
   	
-	<!--축제 정보 update 또는 insert <상세내용 추가>-->
+<!--  	 축제 상세보기-->
+  	<select id="selectDetailByContentId" resultType="com.study.app.domains.festival.dto.FestDetailDTO">
+  		select * from festival_info where content_id = #{content_id}
+  	</select>
+  	
+  	
+<!--  		축제 정보 update 또는 insert <상세내용 추가>-->
 
     <update id="upsertFestival" parameterType="com.study.app.domains.festival.dto.FestivalDTO">
         MERGE INTO festival_info f
@@ -33,55 +39,137 @@
             f.event_start_date   = #{event_start_date},
             f.event_end_date     = #{event_end_date},
             f.modified_time      = #{modified_time},
-            f.overview           = #{overview,jdbcType=CLOB},
+			f.overview           = #{overview,jdbcType=CLOB},
             f.sponsor1_tel       = #{sponsor1_tel,jdbcType=VARCHAR},
             f.homepage           = #{homepage,jdbcType=CLOB},
             f.spon_place         = #{spon_place,jdbcType=VARCHAR},
             f.use_time_festival  = #{use_time_festival,jdbcType=VARCHAR}
  
         WHEN NOT MATCHED THEN INSERT (
-            content_id,
-            title,
-            addr1,
-            addr2,
-            region_code,
-            sigungu_code,
-            first_image,
-            first_image2,
-            map_x,
-            map_y,
-            map_level,
-            event_start_date,
-            event_end_date,
-            created_time,
-            modified_time,
-            overview,
-            sponsor1_tel,
-            homepage,
-            spon_place,
-            use_time_festival
-        ) VALUES (
-            #{content_id},
-            #{title},
-            #{addr1},
-            #{addr2},
-            #{region_code},
-            #{sigungu_code},
-            #{first_image},
-            #{first_image2},
-            #{map_x},
-            #{map_y},
-            #{map_level},
-            #{event_start_date},
-            #{event_end_date},
-            #{created_time},
-            #{modified_time},
-            #{overview},
-            #{sponsor1_tel},
-            #{homepage},
-            #{spon_place},
-            #{use_time_festival}
-        )
+		    content_id,
+		    title,
+		    addr1,
+		    addr2,
+		    region_code,
+		    sigungu_code,
+		    first_image,
+		    first_image2,
+		    map_x,
+		    map_y,
+		    map_level,
+		    event_start_date,
+		    event_end_date,
+		    created_time,
+		    modified_time,
+		    view_count,
+		    like_count,
+		    review_count,
+		    rating_avg
+		) VALUES (
+		    #{content_id},
+		    #{title},
+		    #{addr1},
+		    #{addr2},
+		    #{region_code},
+		    #{sigungu_code},
+		    #{first_image},
+		    #{first_image2},
+		    #{map_x},
+		    #{map_y},
+		    #{map_level},
+		    #{event_start_date},
+		    #{event_end_date},
+		    #{created_time},
+		    #{modified_time},
+		    0,
+		    0,
+		    0,
+		    0
+		)
     </update>
+    
+	<!--    CLOB 분리-->
+    <update id="updateFestivalDetail">
+	    UPDATE festival_info
+	    SET
+	        overview = #{overview,jdbcType=CLOB},
+	        homepage = #{homepage,jdbcType=CLOB},
+	        sponsor1_tel = #{sponsor1_tel,jdbcType=VARCHAR},
+	        spon_place = #{spon_place,jdbcType=VARCHAR},
+	        use_time_festival = #{use_time_festival,jdbcType=VARCHAR}
+	    WHERE content_id = #{content_id}
+	</update>
+  	
+<!--	축제 정보 update 또는 insert <상세내용 추가>-->
+
+<!--    <update id="upsertFestival" parameterType="com.study.app.domains.festival.dto.FestivalDTO">-->
+<!--        MERGE INTO festival_info f-->
+<!--        USING DUAL-->
+<!--        ON (f.content_id = #{content_id})-->
+ 
+<!--        WHEN MATCHED THEN UPDATE SET-->
+<!--            f.title              = #{title},-->
+<!--            f.addr1              = #{addr1},-->
+<!--            f.addr2              = #{addr2},-->
+<!--            f.region_code        = #{region_code},-->
+<!--            f.sigungu_code       = #{sigungu_code},-->
+<!--            f.first_image        = #{first_image},-->
+<!--            f.first_image2       = #{first_image2},-->
+<!--            f.map_x              = #{map_x},-->
+<!--            f.map_y              = #{map_y},-->
+<!--            f.map_level          = #{map_level},-->
+<!--            f.event_start_date   = #{event_start_date},-->
+<!--            f.event_end_date     = #{event_end_date},-->
+<!--            f.modified_time      = #{modified_time},-->
+<!--			f.overview           = #{overview,jdbcType=CLOB},-->
+<!--            f.sponsor1_tel       = #{sponsor1_tel,jdbcType=VARCHAR},-->
+<!--            f.homepage           = #{homepage,jdbcType=CLOB},-->
+<!--            f.spon_place         = #{spon_place,jdbcType=VARCHAR},-->
+<!--            f.use_time_festival  = #{use_time_festival,jdbcType=VARCHAR}-->
+ 
+<!--        WHEN NOT MATCHED THEN INSERT (-->
+<!--            content_id,-->
+<!--            title,-->
+<!--            addr1,-->
+<!--            addr2,-->
+<!--            region_code,-->
+<!--            sigungu_code,-->
+<!--            first_image,-->
+<!--            first_image2,-->
+<!--            map_x,-->
+<!--            map_y,-->
+<!--            map_level,-->
+<!--            event_start_date,-->
+<!--            event_end_date,-->
+<!--            created_time,-->
+<!--            modified_time,-->
+<!--            overview,-->
+<!--            sponsor1_tel,-->
+<!--            homepage,-->
+<!--            spon_place,-->
+<!--            use_time_festival-->
+<!--        ) VALUES (-->
+<!--            #{content_id},-->
+<!--            #{title},-->
+<!--            #{addr1},-->
+<!--            #{addr2},-->
+<!--            #{region_code},-->
+<!--            #{sigungu_code},-->
+<!--            #{first_image},-->
+<!--            #{first_image2},-->
+<!--            #{map_x},-->
+<!--            #{map_y},-->
+<!--            #{map_level},-->
+<!--            #{event_start_date},-->
+<!--            #{event_end_date},-->
+<!--            #{created_time},-->
+<!--            #{modified_time},-->
+<!--            #{overview,jdbcType=CLOB},-->
+<!--            #{sponsor1_tel},-->
+<!--            #{homepage,jdbcType=CLOB},-->
+<!--            #{spon_place},-->
+<!--            #{use_time_festival}-->
+<!--        )-->
+<!--    </update>-->
 	
   </mapper>
