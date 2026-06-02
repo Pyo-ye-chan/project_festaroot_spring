@@ -46,6 +46,9 @@ public class FestivalDTO {
     private String created_time;
     private String modified_time;
     
+    // 인덱싱 완료 시점의 수정일 (VARCHAR2(14))
+    private String indexed_modified_time;
+    
     // 통계 및 정렬용 데이터 (기본값 0 대응)
     private Long view_count;
     private Long like_count;
@@ -60,7 +63,7 @@ public class FestivalDTO {
 			String sigungu_code, String first_image, String first_image2, Double map_x, Double map_y, Integer map_level,
 			String event_start_date, String event_end_date, String overview, String spon_place,
 			String use_time_festival, String sponsor1_tel, String homepage, String created_time, String modified_time,
-			Long view_count, Long like_count, Long review_count, Double rating_avg) {
+			String indexed_modified_time, Long view_count, Long like_count, Long review_count, Double rating_avg) {
 		super();
 		this.content_id = content_id;
 		this.title = title;
@@ -82,6 +85,7 @@ public class FestivalDTO {
 		this.homepage = homepage;
 		this.created_time = created_time;
 		this.modified_time = modified_time;
+		this.indexed_modified_time = indexed_modified_time;
 		this.view_count = view_count;
 		this.like_count = like_count;
 		this.review_count = review_count;
@@ -246,6 +250,14 @@ public class FestivalDTO {
 
 	public void setModified_time(String modified_time) {
 		this.modified_time = modified_time;
+	}
+
+	public String getIndexed_modified_time() {
+		return indexed_modified_time;
+	}
+
+	public void setIndexed_modified_time(String indexed_modified_time) {
+		this.indexed_modified_time = indexed_modified_time;
 	}
 
 	public Long getView_count() {
