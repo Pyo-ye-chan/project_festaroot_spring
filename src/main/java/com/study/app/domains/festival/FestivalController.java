@@ -38,23 +38,17 @@ public class FestivalController {
 	// 축제 찾기 > 네비게이터 반영한 축제 목록 (getAllFestivals 대체)	
 	@GetMapping
 	public ResponseEntity<?> getFestivals(FestivalSearchDTO searchDTO) {
-	    // 1. 프론트에서 넘어온 페이징 파라미터 확인 (기본값 방어 코드)
+	    // 프론트에서 넘어온 페이징 파라미터 확인
 	    int currentPage = searchDTO.getPage() > 0 ? searchDTO.getPage() : 1;
 	    int size = searchDTO.getSize() > 0 ? searchDTO.getSize() : 9;
 	    
-	    // 2. DB에서 검색 조건에 맞는 '총 게시글 수' 조회
+	    // DB에서 검색 조건에 맞는 '총 게시글 수' 조회
 	    int totalCount = feServ.getSearchFestivalCount(searchDTO);
 	    
-	    // 3. 실제 DB에서 해당 페이지 분량만큼의 리스트 조회
+	    // 실제 DB에서 해당 페이지 분량만큼의 리스트 조회
 	    List<FestivalDTO> list = feServ.getSearchFestivals(searchDTO);
 	    
-	 // 🔍여기에 이 콘솔 출력 코드를 넣고 서버 콘솔을 다시 확인해봐!
-	    System.out.println("===============================================");
-	    System.out.println("👉 DB에서 조회된 총 개수 (totalCount) : " + totalCount);
-	    System.out.println("👉 리스트에 담긴 실제 축제 개수 (list size) : " + (list != null ? list.size() : 0));
-	    System.out.println("===============================================");
-	    
-	    // 4. 페이징 네비게이션 블록 계산 로직 (보통 한 화면에 5개 혹은 10개씩 페이지 번호를 보여줌)
+	    // 페이징 네비게이터 계산 로직
 	    int pageBlock = 5; // 하단에 보여줄 페이지 번호 개수 (예: 1 2 3 4 5)
 	    int totalPage = (int) Math.ceil((double) totalCount / size); // 총 페이지 수
 	    
@@ -74,7 +68,7 @@ public class FestivalController {
 	    boolean existPrev = startPage > 1;
 	    boolean existNext = endPage < totalPage;
 	    
-	    // 5. 리액트가 정확히 수신할 수 있도록 객체(Map) 구조화
+	    // 리액트가 정확히 수신할 수 있도록 객체(Map) 구조화
 	    Map<String, Object> responseMap = new HashMap<>();
 	    responseMap.put("list", list); // 축제 데이터 배열
 	    
@@ -83,7 +77,7 @@ public class FestivalController {
 	    pageInfoMap.put("endPage", endPage);
 	    pageInfoMap.put("existPrev", existPrev);
 	    pageInfoMap.put("existNext", existNext);
-	    pageInfoMap.put("totalCount", totalCount); // 총 결과 개수 반영!
+	    pageInfoMap.put("totalCount", totalCount); // 총 결과 개수 반영
 	    
 	    responseMap.put("pageInfo", pageInfoMap);
 	    
