@@ -103,7 +103,7 @@ public class RegionMasterService {
 		return regionMasterMapper.selectAllSido();
 	}
 
-	public List<RegionMasterDTO> getSigunguList(String regionCode) {
-		return regionMasterMapper.selectAllSigungu(regionCode);
+	public List<RegionMasterDTO> getSigunguList(String region_code) {
+		return regionMasterMapper.selectAllSigungu(region_code);
 	}
 }
