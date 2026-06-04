@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.study.app.domains.activity.UserActivityLogDAO">
+
+    <insert id="insertLog" parameterType="com.study.app.domains.activity.dto.UserActivityLogDTO">
+        MERGE INTO USER_ACTIVITY_LOG L
+        USING (
+            SELECT 
+                #{member_id} as m_id, 
+                #{action_type} as a_type, 
+                #{content_id, jdbcType=NUMERIC} as c_id, 
+                #{keyword, jdbcType=VARCHAR} as kw
+            FROM DUAL
+        ) T
+        ON (
+            L.MEMBER_ID = T.m_id AND 
+            L.ACTION_TYPE = T.a_type AND 
+            (L.CONTENT_ID = T.c_id OR (L.CONTENT_ID IS NULL AND T.c_id IS NULL)) AND
+            (L.KEYWORD = T.kw OR (L.KEYWORD IS NULL AND T.kw IS NULL))
+        )
+        WHEN MATCHED THEN
+            UPDATE SET CREATED_AT = SYSDATE
+        WHEN NOT MATCHED THEN
+            INSERT (LOG_ID, MEMBER_ID, ACTION_TYPE, CONTENT_ID, KEYWORD, CREATED_AT)
+            VALUES (USER_ACTIVITY_LOG_SEQ.NEXTVAL, T.m_id, T.a_type, T.c_id, T.kw, SYSDATE)
+    </insert>
+
+    <select id="selectRecentLogs" parameterType="string" resultType="com.study.app.domains.activity.dto.UserActivityLogDTO">
+        SELECT
+            LOG_ID,
+            MEMBER_ID,
+            ACTION_TYPE,
+            CONTENT_ID,
+            KEYWORD,
+            CREATED_AT
+        FROM (
+            SELECT * FROM USER_ACTIVITY_LOG
+            WHERE MEMBER_ID = #{member_id}
+            ORDER BY CREATED_AT DESC
+        )
+        WHERE ROWNUM &lt;= 10
+    </select>
+
+</mapper>
