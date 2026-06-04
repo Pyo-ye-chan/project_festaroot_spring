@@ -58,6 +58,52 @@
         WHERE content_id = #{content_id}
     </update>
 
+    <!-- 지역별 축제 목록 조회 (추천 후보군용) -->
+    <select id="selectByRegion" parameterType="string" resultType="map">
+        SELECT * FROM (
+            SELECT content_id, title, overview, first_image
+            FROM festival_info
+            WHERE addr1 LIKE '%' || #{region} || '%'
+            AND overview IS NOT NULL
+            ORDER BY modified_time DESC
+        )
+        WHERE ROWNUM &lt;= 20
+    </select>
+
+    <!-- 추천된 축제의 상세 정보 조회 -->
+    <select id="selectDetailForRecommendation" parameterType="long" resultType="map">
+        SELECT content_id, title, addr1, first_image, event_start_date, event_end_date, overview
+        FROM festival_info
+        WHERE content_id = #{content_id}
+    </select>
+
+    <!-- 관심 테마 기반 축제 조회 (추천 후보용) -->
+    <select id="selectByInterestThemes" parameterType="list" resultType="map">
+        SELECT * FROM (
+            SELECT DISTINCT f.content_id, f.title, f.overview, f.first_image
+            FROM festival_info f
+            JOIN FESTIVAL_THEMES ft ON f.content_id = ft.content_id
+            WHERE ft.theme_code IN 
+            <foreach collection="list" item="code" open="(" separator="," close=")">
+                #{code}
+            </foreach>
+            AND f.overview IS NOT NULL
+            ORDER BY f.modified_time DESC
+        )
+        WHERE ROWNUM &lt;= 20
+    </select>
+
+    <!-- 인기 축제 조회 (활동 로그 없을 때 fallback용) -->
+    <select id="selectPopularFestivals" resultType="map">
+        SELECT * FROM (
+            SELECT f.content_id, f.title, f.overview, f.first_image
+            FROM festival_info f
+            WHERE f.overview IS NOT NULL
+            ORDER BY f.modified_time DESC
+        )
+        WHERE ROWNUM &lt;= 10
+    </select>
+
 	<!--축제 찾기 검색 조건-->
     <select id="selectByOptions"
             parameterType="com.study.app.domains.festival.dto.FestivalSearchDTO"

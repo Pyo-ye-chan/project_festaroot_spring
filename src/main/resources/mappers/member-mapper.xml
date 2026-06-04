@@ -20,4 +20,16 @@
 	    )
 	</insert>
 
+    <select id="selectMemberById" parameterType="string" resultType="com.study.app.domains.member.dto.MemberDTO">
+        SELECT * FROM MEMBER WHERE MEMBER_ID = #{member_id}
+    </select>
+
+    <select id="selectInterestRegions" parameterType="string" resultType="com.study.app.domains.member.dto.InterestRegionDTO">
+        SELECT * FROM MEMBER_INTEREST_REGION WHERE MEMBER_ID = #{member_id}
+    </select>
+
+    <select id="selectInterestThemes" parameterType="string" resultType="com.study.app.domains.member.dto.InterestThemeDTO">
+        SELECT * FROM MEMBER_INTEREST_THEME WHERE MEMBER_ID = #{member_id}
+    </select>
+
 </mapper>

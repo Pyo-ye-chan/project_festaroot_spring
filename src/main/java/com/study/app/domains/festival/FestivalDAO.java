@@ -67,4 +67,24 @@ public class FestivalDAO {
             java.util.Map.of("content_id", contentId, "modified_time", modifiedTime));
     }
 
+    // 지역별 축제 조회 (추천 후보용)
+    public List<Map<String, Object>> getFestivalsByRegion(String region) {
+        return mybatis.selectList("Festival.selectByRegion", region);
+    }
+
+    // 추천용 축제 상세 조회
+    public Map<String, Object> getFestivalDetail(Long contentId) {
+        return mybatis.selectOne("Festival.selectDetailForRecommendation", contentId);
+    }
+
+    // 관심 테마 기반 축제 조회
+    public List<Map<String, Object>> getFestivalsByThemes(List<String> themeCodes) {
+        return mybatis.selectList("Festival.selectByInterestThemes", themeCodes);
+    }
+
+    // 인기 축제 조회 (Fallback)
+    public List<Map<String, Object>> getPopularFestivals() {
+        return mybatis.selectList("Festival.selectPopularFestivals");
+    }
+
 }
