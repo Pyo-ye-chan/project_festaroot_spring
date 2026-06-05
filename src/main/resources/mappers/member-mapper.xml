@@ -75,6 +75,27 @@
 	    THEME_MASTER tm ON t.THEME_CODE = tm.THEME_CODE
 		WHERE MEMBER_ID = #{member_id}
     </select>
-   
+
+    <update id="updateMember" parameterType="com.study.app.domains.member.dto.MemberDTO">
+        UPDATE MEMBER
+        <set>
+            <if test="nickname != null">NICKNAME = #{nickname},</if>
+            <if test="phone != null">PHONE = #{phone},</if>
+            <if test="addr_sido != null">ADDR_SIDO = #{addr_sido},</if>
+            <if test="addr_sigungu != null">ADDR_SIGUNGU = #{addr_sigungu},</if>
+            <if test="reside_area_code != null">RESIDE_AREA_CODE = #{reside_area_code},</if>
+            <if test="reside_sigungu_code != null">RESIDE_SIGUNGU_CODE = #{reside_sigungu_code},</if>
+            <if test="profile_image_url != null">PROFILE_IMAGE_URL = #{profile_image_url}</if>
+        </set>
+        WHERE MEMBER_ID = #{member_id}
+    </update>
+
+    <delete id="deleteInterestThemes" parameterType="string">
+        DELETE FROM MEMBER_INTEREST_THEME WHERE MEMBER_ID = #{member_id}
+    </delete>
+
+    <delete id="deleteInterestRegions" parameterType="string">
+        DELETE FROM MEMBER_INTEREST_REGION WHERE MEMBER_ID = #{member_id}
+    </delete>
 
 </mapper>

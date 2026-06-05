@@ -22,4 +22,8 @@ public interface MemberDAO {
     
     MemberDTO getProfile(String member_id);
 
+    int updateMember(MemberDTO memberDTO);
+    int deleteInterestThemes(String member_id);
+    int deleteInterestRegions(String member_id);
+
 }

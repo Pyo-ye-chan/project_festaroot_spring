@@ -1,5 +1,6 @@
 package com.study.app.domains.member;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -7,6 +8,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.study.app.domains.member.dto.InterestRegionDTO;
 import com.study.app.domains.member.dto.InterestThemeDTO;
@@ -29,6 +31,33 @@ public class MemberService {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    /**
+     * FormData 등으로 들어온 지저분한 리스트 데이터를 정제합니다.
+     * 예: ["THEME001"] -> THEME001
+     */
+    private List<String> cleanList(List<String> rawList) {
+        if (rawList == null || rawList.isEmpty()) return rawList;
+        
+        Set<String> cleanedSet = new HashSet<>();
+        for (String item : rawList) {
+            if (item == null) continue;
+            
+            // JSON 배열 형태인 경우 ([", "], [ 등 제거)
+            String cleaned = item.replaceAll("[\\[\\]\"]", "");
+            
+            // 쉼표로 구분된 여러 값이 들어온 경우 분리
+            String[] parts = cleaned.split(",");
+            for (String part : parts) {
+                String trimmed = part.trim();
+                if (!trimmed.isEmpty()) {
+                    cleanedSet.add(trimmed);
+                }
+            }
+        }
+        return new ArrayList<>(cleanedSet);
+    }
+
+    @Transactional
     public int signup(MemberDTO memberDTO) {
 
         memberDTO.setPassword(bCryptPasswordEncoder.encode(memberDTO.getPassword()));
@@ -54,36 +83,25 @@ public class MemberService {
         }
 
         int result = memberDAO.insertMember(memberDTO);
-        
-        System.out.println("themes = " + memberDTO.getThemes());
 
         if (result > 0) {
-            if (memberDTO.getThemes() != null) {
-                Set<String> uniqueThemes = new HashSet<>(memberDTO.getThemes());
-
-                for (String themeCode : uniqueThemes) {
-                    System.out.println(
-                            memberDTO.getMember_id() + " / " + themeCode
-                        );
-                    memberDAO.insertInterestTheme(
-                        new InterestThemeDTO(memberDTO.getMember_id(), themeCode)
-                    );
+            List<String> cleanedThemes = cleanList(memberDTO.getThemes());
+            if (cleanedThemes != null) {
+                for (String themeCode : cleanedThemes) {
+                    memberDAO.insertInterestTheme(new InterestThemeDTO(memberDTO.getMember_id(), themeCode));
                 }
             }
 
-            if (memberDTO.getRegions() != null) {
-                Set<String> uniqueRegions = new HashSet<>(memberDTO.getRegions());
-
-                for (String regionCode : uniqueRegions) {
-                    memberDAO.insertInterestRegion(
-                        new InterestRegionDTO(memberDTO.getMember_id(), regionCode, null)
-                    );
+            List<String> cleanedRegions = cleanList(memberDTO.getRegions());
+            if (cleanedRegions != null) {
+                for (String regionCode : cleanedRegions) {
+                    memberDAO.insertInterestRegion(new InterestRegionDTO(memberDTO.getMember_id(), regionCode, null));
                 }
             }
         }
         return result;
     }
-    
+
     public MemberProfileDTO getProfile(String member_id) {
         MemberDTO member = memberDAO.selectMemberById(member_id);
         if (member == null) return null;
@@ -91,11 +109,34 @@ public class MemberService {
         List<InterestRegionDTO> regions = memberDAO.selectInterestRegions(member_id);
         List<InterestThemeDTO> themes = memberDAO.selectInterestThemes(member_id);
         List<com.study.app.domains.activity.dto.UserActivityLogDTO> logs = userActivityLogDAO.selectRecentLogs(member_id);
-        
-        for(int i =0;i<logs.size();i++) {
-        		System.out.println(logs.get(i).getTitle());
-        }
-        
+
         return new MemberProfileDTO(member, regions, themes, logs);
     }
+
+    @Transactional
+    public int updateProfile(String member_id, MemberDTO memberDTO) {
+        memberDTO.setMember_id(member_id);
+        int result = memberDAO.updateMember(memberDTO);
+
+        if (result > 0) {
+            // Update Interest Themes
+            memberDAO.deleteInterestThemes(member_id);
+            List<String> cleanedThemes = cleanList(memberDTO.getThemes());
+            if (cleanedThemes != null) {
+                for (String themeCode : cleanedThemes) {
+                    memberDAO.insertInterestTheme(new InterestThemeDTO(member_id, themeCode));
+                }
+            }
+
+            // Update Interest Regions
+            memberDAO.deleteInterestRegions(member_id);
+            List<String> cleanedRegions = cleanList(memberDTO.getRegions());
+            if (cleanedRegions != null) {
+                for (String regionCode : cleanedRegions) {
+                    memberDAO.insertInterestRegion(new InterestRegionDTO(member_id, regionCode, null));
+                }
+            }
+        }
+        return result;
     }
+}
