@@ -5,6 +5,18 @@ public class InterestThemeDTO {
 	private String member_id;
 	private String theme_code;
 	
+	private String theme_name;
+	
+	
+	
+	public String getTheme_name() {
+		return theme_name;
+	}
+
+	public void setTheme_name(String theme_name) {
+		this.theme_name = theme_name;
+	}
+
 	public InterestThemeDTO() {}
 	
 	public InterestThemeDTO(String member_id, String theme_code) {

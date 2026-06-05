@@ -38,6 +38,12 @@ public class FestivalController {
 	
 	@Autowired
 	private RegionMasterService regionMasterService;
+	
+	@GetMapping("/map")
+	public ResponseEntity<List<FestivalDTO>> getAllFestival() {
+		List<FestivalDTO> list = feServ.getAllFestival();
+		return ResponseEntity.ok(list);
+	}
 
 	// 축제 찾기 > 네비게이터 반영한 축제 목록 (getAllFestivals 대체)	
 	@GetMapping

@@ -1,6 +1,7 @@
 package com.study.app.domains.member;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.study.app.domains.member.dto.InterestRegionDTO;
 import com.study.app.domains.member.dto.InterestThemeDTO;
 import com.study.app.domains.member.dto.MemberDTO;
+import com.study.app.domains.member.dto.MemberProfileDTO;
 import com.study.app.utils.JWTUtil;
 
 @Service
@@ -17,6 +19,9 @@ public class MemberService {
 
     @Autowired
     private MemberDAO memberDAO;
+
+    @Autowired
+    private com.study.app.domains.activity.UserActivityLogDAO userActivityLogDAO;
 
     @Autowired
     private JWTUtil jwtUtil;
@@ -78,4 +83,19 @@ public class MemberService {
         }
         return result;
     }
-}
+    
+    public MemberProfileDTO getProfile(String member_id) {
+        MemberDTO member = memberDAO.selectMemberById(member_id);
+        if (member == null) return null;
+
+        List<InterestRegionDTO> regions = memberDAO.selectInterestRegions(member_id);
+        List<InterestThemeDTO> themes = memberDAO.selectInterestThemes(member_id);
+        List<com.study.app.domains.activity.dto.UserActivityLogDTO> logs = userActivityLogDAO.selectRecentLogs(member_id);
+        
+        for(int i =0;i<logs.size();i++) {
+        		System.out.println(logs.get(i).getTitle());
+        }
+        
+        return new MemberProfileDTO(member, regions, themes, logs);
+    }
+    }

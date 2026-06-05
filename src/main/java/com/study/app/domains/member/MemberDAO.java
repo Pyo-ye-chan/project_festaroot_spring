@@ -19,6 +19,7 @@ public interface MemberDAO {
     int insertInterestTheme(InterestThemeDTO dto);
 
     int insertInterestRegion(InterestRegionDTO dto);
-
+    
+    MemberDTO getProfile(String member_id);
 
 }

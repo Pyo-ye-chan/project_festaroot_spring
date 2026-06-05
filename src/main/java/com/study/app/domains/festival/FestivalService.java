@@ -39,6 +39,10 @@ public class FestivalService {
 
 	@Value("${kto.service.key}")
 	private String serviceKey;
+	
+	public List<FestivalDTO> getAllFestival() {
+		return fdao.getAllFestival();
+	}
 
 	// 축제 찾기 > 검색 조건에 맞는 축제 목록 가져오기
 	public List<FestivalDTO> getSearchFestivals(FestivalSearchDTO searchDTO){

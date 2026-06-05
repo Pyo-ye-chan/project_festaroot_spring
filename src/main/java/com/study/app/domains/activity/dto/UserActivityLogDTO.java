@@ -28,8 +28,20 @@ public class UserActivityLogDTO {
         this.keyword = keyword;
         this.created_at = created_at;
     }
+    
+    private String title;
+    
+    
 
-    public Long getLog_id() {
+    public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public Long getLog_id() {
         return log_id;
     }
 

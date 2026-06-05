@@ -55,11 +55,26 @@
     </select>
 
     <select id="selectInterestRegions" parameterType="string" resultType="com.study.app.domains.member.dto.InterestRegionDTO">
-        SELECT * FROM MEMBER_INTEREST_REGION WHERE MEMBER_ID = #{member_id}
+		        SELECT 
+		    r.*, 
+		    rm.REGION_NAME
+		FROM 
+		    MEMBER_INTEREST_REGION r
+		JOIN (
+		    SELECT REGION_CODE, MIN(REGION_NAME) AS REGION_NAME
+		    FROM REGION_MASTER
+		    GROUP BY REGION_CODE
+		) rm ON r.REGION_CODE = rm.REGION_CODE
+		WHERE 
+		    r.MEMBER_ID = #{member_id}
     </select>
 
     <select id="selectInterestThemes" parameterType="string" resultType="com.study.app.domains.member.dto.InterestThemeDTO">
-        SELECT * FROM MEMBER_INTEREST_THEME WHERE MEMBER_ID = #{member_id}
+        SELECT t.*,tm.THEME_NAME FROM MEMBER_INTEREST_THEME T 
+        LEFT JOIN 
+	    THEME_MASTER tm ON t.THEME_CODE = tm.THEME_CODE
+		WHERE MEMBER_ID = #{member_id}
     </select>
+   
 
 </mapper>

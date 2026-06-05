@@ -34,11 +34,16 @@
             ACTION_TYPE,
             CONTENT_ID,
             KEYWORD,
-            CREATED_AT
+            CREATED_AT,
+            TITLE
         FROM (
-            SELECT * FROM USER_ACTIVITY_LOG
-            WHERE MEMBER_ID = #{member_id}
-            ORDER BY CREATED_AT DESC
+            SELECT 
+                L.*, 
+                F.TITLE 
+            FROM USER_ACTIVITY_LOG L
+            LEFT JOIN FESTIVAL_INFO F ON L.CONTENT_ID = F.CONTENT_ID
+            WHERE L.MEMBER_ID = #{member_id}
+            ORDER BY L.CREATED_AT DESC
         )
         WHERE ROWNUM &lt;= 10
     </select>

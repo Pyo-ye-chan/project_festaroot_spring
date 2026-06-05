@@ -16,6 +16,10 @@ public class FestivalDAO {
 
 	@Autowired
 	private SqlSessionTemplate mybatis;
+	
+	public List<FestivalDTO> getAllFestival(){
+		return mybatis.selectList("Festival.getAll");
+	}
 
 	// 축제 찾기 > 조건에 맞는 축제 목록 가져오기
 	public List<FestivalDTO> getSearchFestivals(FestivalSearchDTO searchDTO) {

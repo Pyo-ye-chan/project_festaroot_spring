@@ -1,13 +1,16 @@
 package com.study.app.domains.member;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.study.app.domains.auth.dto.LoginDTO;
 import com.study.app.domains.member.dto.MemberDTO;
+import com.study.app.domains.member.dto.MemberProfileDTO;
 
 @RestController
 @RequestMapping("/member")
@@ -27,6 +30,13 @@ public class MemberController {
         }
         
         
+    }
+    
+    @GetMapping("/profile/{id}")
+    public ResponseEntity<MemberProfileDTO> getProfile(@PathVariable("id") String id){
+    		System.out.println(id);
+    		MemberProfileDTO dto = memberService.getProfile(id);
+    		return ResponseEntity.ok(dto);
     }
     
 
