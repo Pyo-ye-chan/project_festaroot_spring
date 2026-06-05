@@ -195,7 +195,8 @@ public class FestivalController {
 	    System.out.println("==================================");
 
 	    if (memberId == null) {
-	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 정보(memberId)가 비어있습니다. 인터셉터 설정을 확인하세요.");
+	    	System.out.println("헤더에 user-id가 없음!");
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
 	    }
 
 	    Object contentIdObj = requestBody.get("contentId");
