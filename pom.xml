@@ -8,6 +8,8 @@
       <artifactId>spring-boot-starter-parent</artifactId>
       <version>4.0.6</version>
       <relativePath /> <!-- lookup parent from repository -->
+      
+      
    </parent>
    <groupId>com.study.app</groupId>
    <artifactId>app</artifactId>
@@ -32,6 +34,12 @@
       <spring-ai.version>2.0.0-M6</spring-ai.version>
    </properties>
    <dependencies>
+   
+	<dependency>
+	    <groupId>com.google.cloud</groupId>
+	    <artifactId>google-cloud-storage</artifactId>
+	    <version>2.58.1</version>
+	</dependency>
    
       <dependency>
           <groupId>org.projectlombok</groupId>
