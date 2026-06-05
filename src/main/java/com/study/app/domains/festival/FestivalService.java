@@ -3,17 +3,17 @@ package com.study.app.domains.festival;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,13 +45,18 @@ public class FestivalService {
 	}
 
 	// 축제 찾기 > 검색 조건에 맞는 축제 목록 가져오기
-	public List<FestivalDTO> getSearchFestivals(FestivalSearchDTO searchDTO){
+	public List<FestivalDTO> getSearchFestivals(FestivalSearchDTO searchDTO) {
 		return fdao.getSearchFestivals(searchDTO);
 	}
-	
+
 	// 축제 찾기 > 네비게이터 카운트
 	public int getSearchFestivalCount(FestivalSearchDTO searchDTO) {
 		return fdao.getSearchFestivalCount(searchDTO);
+	}
+
+	// 축제 찾기 > 목록 클릭 > 축제별 조회수
+	public void increaseViewCount(String contentId) {
+		fdao.increaseViewCount(contentId);
 	}
 
 	public FestivalDTO selectByContentId(String contentId) {
@@ -296,9 +301,9 @@ public class FestivalService {
 	public void saveFestivalInfoFromApi() {
 		try {
 			// 동적으로 현재 연도 구하기 (예: 2026년이면 2026이 담김)
-	        int currentYear = LocalDate.now().getYear();
-	        String startDate = currentYear + "0101"; // "20260101" 형태로 문자열 조립
-			
+			int currentYear = LocalDate.now().getYear();
+			String startDate = currentYear + "0101"; // "20260101" 형태로 문자열 조립
+
 			int numOfRows = 100; // 한 페이지에 가져올 양 변수 지정
 			int totalPages = 1; // 최소 1페이지로 변수 지정
 
@@ -316,7 +321,7 @@ public class FestivalService {
 				String response = restTemplate.getForObject(uri, String.class); // API 호출
 
 				// API 내용 확인 > JSON
-				//System.out.println(">>> [공공 API 응답] : " + response); // 길어서 주석처리함.
+				// System.out.println(">>> [공공 API 응답] : " + response); // 길어서 주석처리함.
 
 				// 잭슨 라이브러리로 item 까지 들어가기
 				ObjectMapper mapper = new ObjectMapper();
@@ -324,10 +329,9 @@ public class FestivalService {
 				JsonNode itemNode = root.path("response").path("body").path("items").path("item");
 
 				// itemNode의 타입 확인하기 > ARRAY
-				//System.out.println(">>>> [itemNode 타입]: " + itemNode.getNodeType());
+				// System.out.println(">>>> [itemNode 타입]: " + itemNode.getNodeType());
 
-				
-				if(i == 1) { // 처음 이 for문을 돌 때, 전체 데이터 수와 페이지 수 계산
+				if (i == 1) { // 처음 이 for문을 돌 때, 전체 데이터 수와 페이지 수 계산
 					// root에서 totalCount int로 총 데이터 수 뽑기
 					int totalCount = root.path("response").path("body").path("totalCount").asInt();
 
@@ -335,14 +339,13 @@ public class FestivalService {
 					totalPages = (int) Math.ceil((double) totalCount / numOfRows);
 					System.out.println("총 데이터 수 : " + totalCount + ", 총 페이지 수 : " + totalPages);
 				}
-			
+
 				if (itemNode.isArray()) { // boolean으로 배열인지 확인
 					for (JsonNode item : itemNode) {
-						
-						
+
 						// FestivalDTO에 item에서 꺼낸 값 담기
 						FestivalDTO dto = new FestivalDTO();
-						
+
 						long contentId = item.path("contentid").asLong();
 
 						dto.setContent_id(item.path("contentid").asLong()); // api에서 contentid 꺼내오고 dto에 설정한 Long형으로 받기
@@ -352,7 +355,8 @@ public class FestivalService {
 
 						// NOT NULL 값 0으로 처리
 						String lDongRegnCd = item.path("lDongRegnCd").asText(); // 지역 코드
-						dto.setRegion_code(lDongRegnCd.isEmpty() ? "0" : lDongRegnCd); // 만약 가리키는 값이 비어있다면 "0", 있으면 그대로 쓰기
+						dto.setRegion_code(lDongRegnCd.isEmpty() ? "0" : lDongRegnCd); // 만약 가리키는 값이 비어있다면 "0", 있으면 그대로
+																						// 쓰기
 
 						String lDongSignguCd = item.path("lDongSignguCd").asText(); // 시군구
 						dto.setSigungu_code(lDongSignguCd.isEmpty() ? "0" : lDongSignguCd);
@@ -370,89 +374,74 @@ public class FestivalService {
 
 						dto.setCreated_time(item.path("createdtime").asText()); // 축제 등록일
 						dto.setModified_time(item.path("modifiedtime").asText()); // 축제 수정일
-						
-						
+
 						// DB에 저장된 기존 축제 조회
-						FestivalDTO dbFestival =
-						        fdao.selectByContentId(String.valueOf(contentId));
+						FestivalDTO dbFestival = fdao.selectByContentId(String.valueOf(contentId));
 
 						// TourAPI 목록에서 받은 최신 수정일
 						String apiModifiedTime = item.path("modifiedtime").asText();
 
 						// DB에 저장된 수정일
-						String dbModifiedTime =
-						        dbFestival == null ? null : dbFestival.getModified_time();
+						String dbModifiedTime = dbFestival == null ? null : dbFestival.getModified_time();
 
 						// DB의 수정일과 API의 수정일이 다르면,
 						// 관광공사 쪽 데이터가 수정된 것으로 판단
-						boolean isUpdated =
-						        dbFestival == null
-						        || isBlank(dbModifiedTime)
-						        || !apiModifiedTime.equals(dbModifiedTime);
-
+						boolean isUpdated = dbFestival == null || isBlank(dbModifiedTime)
+								|| !apiModifiedTime.equals(dbModifiedTime);
 
 						// detailCommon2 호출 여부 판단
-						boolean needCommon =
-						        dbFestival == null
-						        || isUpdated
-						        || isBlank(dbFestival.getOverview())
-						        || isBlank(dbFestival.getHomepage())
-						        || isBlank(dbFestival.getSponsor1_tel());
-
+						boolean needCommon = dbFestival == null || isUpdated || isBlank(dbFestival.getOverview())
+								|| isBlank(dbFestival.getHomepage()) || isBlank(dbFestival.getSponsor1_tel());
 
 						// detailIntro2 호출 여부 판단
-						boolean needIntro =
-						        dbFestival == null
-						        || isUpdated
-						        || isBlank(dbFestival.getSpon_place())
-						        || isBlank(dbFestival.getUse_time_festival());
-
+						boolean needIntro = dbFestival == null || isUpdated || isBlank(dbFestival.getSpon_place())
+								|| isBlank(dbFestival.getUse_time_festival());
 
 						// 공통 상세정보가 없거나,
 						// 관광공사 데이터가 수정된 경우 다시 조회
 						if (needCommon) {
-						    fillDetailCommon(dto, contentId, mapper);
+							fillDetailCommon(dto, contentId, mapper);
 						} else {
-						    dto.setOverview(dbFestival.getOverview());
-						    dto.setHomepage(dbFestival.getHomepage());
-						    dto.setSponsor1_tel(dbFestival.getSponsor1_tel());
+							dto.setOverview(dbFestival.getOverview());
+							dto.setHomepage(dbFestival.getHomepage());
+							dto.setSponsor1_tel(dbFestival.getSponsor1_tel());
 						}
-
 
 						// 축제 소개 상세정보가 없거나,
 						// 관광공사 데이터가 수정된 경우 다시 조회
 						if (needIntro) {
-						    fillDetailIntro(dto, contentId, mapper);
+							fillDetailIntro(dto, contentId, mapper);
 						} else {
-						    dto.setSpon_place(dbFestival.getSpon_place());
-						    dto.setUse_time_festival(dbFestival.getUse_time_festival());
+							dto.setSpon_place(dbFestival.getSpon_place());
+							dto.setUse_time_festival(dbFestival.getUse_time_festival());
 						}
-						
+
 						// festivalDAO 호출 : 값을 가져온 범위 내에서 이미 값이 있으면 update, 없으면 insert
 						// fdao.upsertFestival(dto); // api 값 담은 dto 전달
-						
-						try {
-						    System.out.println("저장 시도 contentId = " + dto.getContent_id());
-						    System.out.println("title = " + dto.getTitle());
-						    System.out.println("homepage length = " + 
-						        (dto.getHomepage() == null ? 0 : dto.getHomepage().length()));
-						    System.out.println("overview length = " + 
-						        (dto.getOverview() == null ? 0 : dto.getOverview().length()));
 
-						    fdao.upsertFestival(dto);
-						    fdao.updateFestivalDetail(dto); 
+						try {
+							System.out.println("저장 시도 contentId = " + dto.getContent_id());
+							System.out.println("title = " + dto.getTitle());
+							System.out.println("homepage length = "
+									+ (dto.getHomepage() == null ? 0 : dto.getHomepage().length()));
+							System.out.println("overview length = "
+									+ (dto.getOverview() == null ? 0 : dto.getOverview().length()));
+
+							fdao.upsertFestival(dto);
+							fdao.updateFestivalDetail(dto);
 
 						} catch (Exception e) {
-						    System.out.println("저장 실패 contentId = " + dto.getContent_id());
-						    System.out.println("title = " + dto.getTitle());
-						    System.out.println("homepage = " + dto.getHomepage());
-						    throw e;
+							System.out.println("저장 실패 contentId = " + dto.getContent_id());
+							System.out.println("title = " + dto.getTitle());
+							System.out.println("homepage = " + dto.getHomepage());
+							throw e;
 						}
-						
+
 					}
 				}
 				// 현재 저장된 진행 상황
-				System.out.println("[동기화 된 페이지] " + i + " / " + totalPages + " 페이지 저장 완료 (" + itemNode.size() + "개 항목)");
+				System.out
+						.println("[동기화 된 페이지] " + i + " / " + totalPages + " 페이지 저장 완료 (" + itemNode.size() + "개 항목)");
 			} // for 문 끝
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -460,17 +449,15 @@ public class FestivalService {
 		}
 	}
 
-    /**
-     * 문자열이 null 이거나 비어있는지 확인
-     *
-     * true  : null, "", "   "
-     * false : 실제 값 존재
-     */
-    private boolean isBlank(String value) {
-        return value == null || value.isBlank();
-    }
+	/**
+	 * 문자열이 null 이거나 비어있는지 확인
+	 *
+	 * true : null, "", " " false : 실제 값 존재
+	 */
+	private boolean isBlank(String value) {
+		return value == null || value.isBlank();
+	}
 
-    
 	// ============================================================================
 	// detailCommon2 조회
 	//
@@ -483,101 +470,89 @@ public class FestivalService {
 	// ============================================================================
 	private void fillDetailCommon(FestivalDTO dto, long contentId, ObjectMapper mapper) {
 
-	    try {
+		try {
 
-	        // TourAPI 상세공통정보 조회 URL 생성
-	        URI uri = UriComponentsBuilder
-	                .fromUriString("https://apis.data.go.kr/B551011/KorService2/detailCommon2")
+			// TourAPI 상세공통정보 조회 URL 생성
+			URI uri = UriComponentsBuilder.fromUriString("https://apis.data.go.kr/B551011/KorService2/detailCommon2")
 
-	                // 공공데이터포털 인증키
-	                .queryParam("serviceKey", serviceKey)
+					// 공공데이터포털 인증키
+					.queryParam("serviceKey", serviceKey)
 
-	                // 필수 파라미터
-	                .queryParam("MobileOS", "ETC")
-	                .queryParam("MobileApp", "AppTest")
+					// 필수 파라미터
+					.queryParam("MobileOS", "ETC").queryParam("MobileApp", "AppTest")
 
-	                // JSON 응답 요청
-	                .queryParam("_type", "json")
+					// JSON 응답 요청
+					.queryParam("_type", "json")
 
-	                // 조회할 축제 contentId
-	                .queryParam("contentId", contentId)
+					// 조회할 축제 contentId
+					.queryParam("contentId", contentId)
 
-	                // 15 = 축제/공연/행사
-	                // .queryParam("contentTypeId", "15")
+					// 15 = 축제/공연/행사
+					// .queryParam("contentTypeId", "15")
 
-	                // 소개글 조회
-	                // .queryParam("overviewYN", "Y")
+					// 소개글 조회
+					// .queryParam("overviewYN", "Y")
 
-	                // 기본정보 조회
-	                // title, tel, homepage 등 포함
-	                // .queryParam("defaultYN", "Y")
-	                
-	                
-	                // .queryParam("firstImageYN", "Y")
+					// 기본정보 조회
+					// title, tel, homepage 등 포함
+					// .queryParam("defaultYN", "Y")
 
+					// .queryParam("firstImageYN", "Y")
 
-	                .build(true)
-	                .toUri();
+					.build(true).toUri();
 
-	        // TourAPI 호출
-	        String response = restTemplate.getForObject(uri, String.class);
-	        
-	        System.out.println(response);
-	        
+			// TourAPI 호출
+			String response = restTemplate.getForObject(uri, String.class);
 
+			System.out.println(response);
 
-	        // JSON 문자열 → JsonNode 변환
-	        JsonNode root = mapper.readTree(response);
+			// JSON 문자열 → JsonNode 변환
+			JsonNode root = mapper.readTree(response);
 
-	        // 응답 구조 접근
-	        JsonNode item = root.path("response")
-	                            .path("body")
-	                            .path("items")
-	                            .path("item");
+			// 응답 구조 접근
+			JsonNode item = root.path("response").path("body").path("items").path("item");
 
 	        // item이 배열 또는 객체로 반환될 수 있음
 	        JsonNode data = item.isArray() ? item.get(0) : item;
 
-	        // 정상 데이터 존재 여부 확인
-	        if (data != null && !data.isMissingNode()) {
+			System.out.println("overview = " + data.path("overview").asText());
+			System.out.println("tel = " + data.path("tel").asText());
+			System.out.println("homepage = " + data.path("homepage").asText());
 
-	            // 소개글
-	            String overview = data.path("overview").asText();
+			// 정상 데이터 존재 여부 확인
+			if (data != null && !data.isMissingNode()) {
 
-	            // 문의전화
-	            String tel = data.path("tel").asText();
+				// 소개글
+				String overview = data.path("overview").asText();
 
-	            // 홈페이지
-	            String homepage = data.path("homepage").asText();
+				// 문의전화
+				String tel = data.path("tel").asText();
 
-	            // 값이 존재할 경우 DTO에 저장
-	            if (!overview.isBlank()) {
-	                dto.setOverview(overview);
-	            }
+				// 홈페이지
+				String homepage = data.path("homepage").asText();
 
-	            if (!tel.isBlank()) {
-	                dto.setSponsor1_tel(tel);
-	            }
+				// 값이 존재할 경우 DTO에 저장
+				if (!overview.isBlank()) {
+					dto.setOverview(overview);
+				}
 
-	            if (!homepage.isBlank()) {
-	                dto.setHomepage(homepage);
-	            }
-	        }
+				if (!tel.isBlank()) {
+					dto.setSponsor1_tel(tel);
+				}
 
-	    } catch (Exception e) {
+				if (!homepage.isBlank()) {
+					dto.setHomepage(homepage);
+				}
+			}
 
-	        // 상세 조회 실패 시에도
-	        // 목록 데이터 저장은 계속 진행되도록 예외 무시
-	        System.err.println(
-	            "[detailCommon2 실패] contentId="
-	            + contentId
-	            + " : "
-	            + e.getMessage()
-	        );
-	    }
+		} catch (Exception e) {
+
+			// 상세 조회 실패 시에도
+			// 목록 데이터 저장은 계속 진행되도록 예외 무시
+			System.err.println("[detailCommon2 실패] contentId=" + contentId + " : " + e.getMessage());
+		}
 	}
-	 
-	 
+
 	// ============================================================================
 	// detailIntro2 조회
 	//
@@ -589,71 +564,56 @@ public class FestivalService {
 	// ============================================================================
 	private void fillDetailIntro(FestivalDTO dto, long contentId, ObjectMapper mapper) {
 
-	    try {
+		try {
 
-	        // TourAPI 상세소개정보 조회 URL 생성
-	        URI uri = UriComponentsBuilder
-	                .fromUriString("https://apis.data.go.kr/B551011/KorService2/detailIntro2")
-	                .queryParam("serviceKey", serviceKey)
-	                .queryParam("MobileOS", "ETC")
-	                .queryParam("MobileApp", "AppTest")
-	                .queryParam("_type", "json")
+			// TourAPI 상세소개정보 조회 URL 생성
+			URI uri = UriComponentsBuilder.fromUriString("https://apis.data.go.kr/B551011/KorService2/detailIntro2")
+					.queryParam("serviceKey", serviceKey).queryParam("MobileOS", "ETC")
+					.queryParam("MobileApp", "AppTest").queryParam("_type", "json")
 
-	                // 조회 대상 축제 ID
-	                .queryParam("contentId", contentId)
+					// 조회 대상 축제 ID
+					.queryParam("contentId", contentId)
 
-	                // 15 = 축제
-	                // .queryParam("contentTypeId", "15")
+					// 15 = 축제
+					// .queryParam("contentTypeId", "15")
 
-	                .build(true)
-	                .toUri();
+					.build(true).toUri();
 
-	        // API 호출
-	        String response = restTemplate.getForObject(uri, String.class);
+			// API 호출
+			String response = restTemplate.getForObject(uri, String.class);
 
-	        // JSON 파싱
-	        JsonNode root = mapper.readTree(response);
+			// JSON 파싱
+			JsonNode root = mapper.readTree(response);
 
-	        JsonNode item = root.path("response")
-	                            .path("body")
-	                            .path("items")
-	                            .path("item");
+			JsonNode item = root.path("response").path("body").path("items").path("item");
 
-	        JsonNode data = item.isArray() ? item.get(0) : item;
+			JsonNode data = item.isArray() ? item.get(0) : item;
 
-	        if (data != null && !data.isMissingNode()) {
+			if (data != null && !data.isMissingNode()) {
 
-	            // 행사 장소
-	            String sponPlace =
-	                    data.path("eventplace").asText();
+				// 행사 장소
+				String sponPlace = data.path("eventplace").asText();
 
-	            // 이용요금 및 관람안내
-	            String useTimeFestival =
-	                    data.path("usetimefestival").asText();
+				// 이용요금 및 관람안내
+				String useTimeFestival = data.path("usetimefestival").asText();
 
-	            // DTO 저장
-	            if (!sponPlace.isBlank()) {
-	                dto.setSpon_place(sponPlace);
-	            }
+				// DTO 저장
+				if (!sponPlace.isBlank()) {
+					dto.setSpon_place(sponPlace);
+				}
 
-	            if (!useTimeFestival.isBlank()) {
-	                dto.setUse_time_festival(useTimeFestival);
-	            }
-	        }
+				if (!useTimeFestival.isBlank()) {
+					dto.setUse_time_festival(useTimeFestival);
+				}
+			}
 
-	    } catch (Exception e) {
+		} catch (Exception e) {
 
-	        // 상세 정보 조회 실패 시
-	        // 전체 동기화 작업은 계속 진행
-	        System.err.println(
-	            "[detailIntro2 실패] contentId="
-	            + contentId
-	            + " : "
-	            + e.getMessage()
-	        );
-	    }
+			// 상세 정보 조회 실패 시
+			// 전체 동기화 작업은 계속 진행
+			System.err.println("[detailIntro2 실패] contentId=" + contentId + " : " + e.getMessage());
+		}
 	}
-	
 	
 	// HomepageURL 주소값만 추출
 	private String extractHomepageUrl(String homepage) {
@@ -695,7 +655,6 @@ public class FestivalService {
 		return dto;
 	}
 	
-	// 축제 이미지 가져오기
 	// 축제 이미지 가져오기
 	public List<FestImageDTO> getFestivalImages(String contentId) {
 	    String url = "https://apis.data.go.kr/B551011/KorService2/detailImage2"
@@ -750,4 +709,41 @@ public class FestivalService {
 	    FestImageDTO image = objectMapper.convertValue(itemObj, FestImageDTO.class);
 	    return List.of(image);
 	}
+
+	// 로그인 기준 축제 찜 목록 조회
+	public List<Long> getMyFestivalLikedIds(String memberId) {
+		return fdao.getMyFestivalLikedIds(memberId);
+	}
+
+	// 로그인 기준 축제 찜 분기 처리
+	@Transactional
+	public boolean toggleFestivalLike(String memberId, Long contentId) {
+		Map<String, Object> toggle = new HashMap<>();
+		toggle.put("member_id", memberId);
+		toggle.put("content_id", contentId);
+
+		// 이미 찜했는지 개수 확인 (0 또는 1)
+		int count = fdao.checkLikeExists(toggle);
+
+		if (count == 0) {
+			// 찜 안 되어 있으면 찜 추가 + 총 찜 개수 증가
+			fdao.insertLike(toggle);
+			fdao.incrementLikeCount(contentId);
+			return true; // 최종 상태: 찜 됨
+		} else {
+			// 이미 찜 되어 있음 ➡️ 찜 삭제 + 총 찜 개수 감소
+			fdao.deleteLike(toggle);
+			fdao.decrementLikeCount(contentId);
+			return false; // 최종 상태: 찜 취소됨
+		}
+	}
+	
+	// 특정 축제의 실시간 총 찜 개수 조회 (실무형 방어 코드 포함)
+		@Transactional(readOnly = true)
+		public int getFestivalLikeCount(Long contentId) {
+			if (contentId == null) {
+				return 0;
+			}
+			return fdao.getFestivalLikeCount(contentId);
+		}
 }
