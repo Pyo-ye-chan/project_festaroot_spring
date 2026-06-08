@@ -58,6 +58,21 @@ public class FestivalService {
 	public void increaseViewCount(String contentId) {
 		fdao.increaseViewCount(contentId);
 	}
+	
+	// 홈 > 지역별 인기 축제 목록 top3
+	public List<FestivalDTO> getTop3ByRegion(String regionName){
+		return fdao.getTop3ByRegion(regionName);
+	}
+	
+	// 홈 > 종료 임박 축제 목록
+	public List<FestivalDTO> getClosingSoonFestivals() {
+        return fdao.getClosingSoonFestivals();
+    }
+	
+	// 홈 > 랜덤 축제 추천
+	public FestivalDTO getRandomFestival() {
+		return fdao.getRandomFestival();
+	}
 
 	public FestivalDTO selectByContentId(String contentId) {
 		return fdao.selectByContentId(contentId);

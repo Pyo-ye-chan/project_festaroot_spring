@@ -24,6 +24,16 @@ public class TokenValidator implements HandlerInterceptor {
 			response.setStatus(HttpServletResponse.SC_OK);
 			return true;
 		}
+		
+		// 요청 경로 확인
+	    String path = request.getRequestURI();
+		
+	    // 토큰 검사X
+		if (path.startsWith("/api/festivals/top") 
+			|| path.startsWith("/api/festivals/closing-soon")
+			|| path.startsWith("/api/festivals/random")) {
+	        return true; 
+	    }
 
 		String authHeader = request.getHeader("Authorization");
 
