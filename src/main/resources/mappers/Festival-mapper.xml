@@ -232,6 +232,43 @@
         FROM FESTIVAL_LIKE 
         WHERE MEMBER_ID = #{memberId}
     </select>
+    
+	<!--홈 > 지역별 인기 축제 정렬-->
+	<!--WHERE rn = 1 : 1. 중복된 축제 중 가장 인기 있는 것 하나만 남김
+		 WHERE ROWNUM &lt;= 3 : 2. 그중 인기순 TOP 3만 가져옴-->
+	<select id="getTop3ByRegion" resultType="com.study.app.domains.festival.dto.FestivalDTO">
+		SELECT * FROM (
+	        SELECT * FROM (
+	            SELECT f.*, 
+	                   ROW_NUMBER() OVER (PARTITION BY f.content_id ORDER BY NVL(f.view_count, 0) DESC, NVL(like_count,0) DESC, event_start_date ASC) as rn
+	            FROM festival_info f
+	            JOIN region_master r ON f.region_code = r.region_code
+	            WHERE r.region_name = #{region}
+	        )
+	        WHERE rn = 1
+	        ORDER BY NVL(view_count, 0) DESC, NVL(like_count,0) DESC, event_start_date ASC
+	    )
+	    WHERE ROWNUM &lt;= 3
+	</select>
+	
+	<!--종료 임박 축제 목록-->
+	<select id="getClosingSoonFestivals" resultType="com.study.app.domains.festival.dto.FestivalDTO">
+		SELECT * FROM (
+			SELECT 
+				content_id,
+				title,
+				addr1,
+				event_start_date,
+				event_end_date,
+				first_image
+			FROM festival_info
+			WHERE 
+				REPLACE(event_end_date, '-', '') >= TO_CHAR(SYSDATE, 'YYYYMMDD')
+				AND REPLACE(event_start_date, '-', '') &lt;= TO_CHAR(SYSDATE, 'YYYYMMDD')
+			ORDER BY REPLACE(event_end_date, '-', '') ASC
+		)
+		WHERE ROWNUM &lt;= 3
+	</select>
 
     <select id="checkLikeExists" parameterType="map" resultType="int">
         SELECT COUNT(*) 

@@ -2,9 +2,10 @@ package com.study.app.domains.festival;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.study.app.domains.festival.dto.EventPlaceDTO;
 import com.study.app.domains.festival.dto.FestDetailDTO;
 import com.study.app.domains.festival.dto.FestImageDTO;
@@ -256,5 +258,19 @@ public class FestivalController {
 
 		    return ResponseEntity.ok(responseMap);
 		}
+		
+		// 지역별 인기 축제 목록
+		@GetMapping("/top")
+		public ResponseEntity<List<FestivalDTO>> getTopFestivalsByRegion(@RequestParam("regionName") String regionName){
+			List<FestivalDTO> topFestivals = feServ.getTop3ByRegion(regionName);
+			return ResponseEntity.ok(topFestivals);
+		}
+		
+		// 종료 임박 축제 목록
+		@GetMapping("/closing-soon")
+	    public ResponseEntity<List<FestivalDTO>> getClosingSoonFestivals() {
+	        List<FestivalDTO> list = feServ.getClosingSoonFestivals();
+	        return ResponseEntity.ok(list);
+	    }
 
 }

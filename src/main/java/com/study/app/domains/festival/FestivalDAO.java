@@ -36,6 +36,16 @@ public class FestivalDAO {
 	public void increaseViewCount(String contentId) {
 		mybatis.insert("Festival.increaseViewCount", contentId);
 	}
+	
+	// 홈 > 지역별 인기 축제 목록 top3
+	public List<FestivalDTO> getTop3ByRegion(String regionName) {
+		return mybatis.selectList("Festival.getTop3ByRegion", regionName);
+	}
+	
+	// 홈 > 종료 임박 축제 목록
+	public List<FestivalDTO> getClosingSoonFestivals() {
+	    return mybatis.selectList("Festival.getClosingSoonFestivals");
+	}
 
 	public FestivalDTO selectByContentId(String contentId) {
 		return mybatis.selectOne("Festival.selectByContentId", contentId);
