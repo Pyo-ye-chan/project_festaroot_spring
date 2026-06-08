@@ -152,17 +152,16 @@
                 </where>
                 
                 <choose>
-                    <when test="sort == 'view_count'">
+                    <when test="sort == 'views'">
                         ORDER BY view_count DESC
                     </when>
-                    <when test="sort == 'like_count'">
-                        ORDER BY like_count DESC
-                    </when>
-                    <when test="sort == 'event_start_date'">
+					<when test="sort == 'popular'">
+					    ORDER BY (NVL(like_count, 0) + (NVL(rating_avg, 0) * 10)) DESC, 
+					             NVL(like_count, 0) DESC, 
+					             created_time DESC
+					</when>
+                    <when test="sort == 'date'">
                         ORDER BY event_start_date ASC
-                    </when>
-                    <when test="sort == 'event_end_date'">
-                        ORDER BY event_end_date ASC
                     </when>
                     <when test="sort == 'title'">
                         ORDER BY title ASC
