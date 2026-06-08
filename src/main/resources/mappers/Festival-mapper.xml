@@ -147,7 +147,7 @@
                         AND event_end_date &lt;= #{event_end_date}
                     </if>
                     <if test="ongoingOnly != null and ongoingOnly == true">
-                        AND REPLACE(event_end_date, '-', '') >= TO_CHAR(SYSDATE, 'YYYYMMDD')
+                        AND REPLACE(event_end_date, '-', '') &gt;= TO_CHAR(SYSDATE, 'YYYYMMDD')
                     </if>
                 </where>
                 
@@ -210,7 +210,7 @@
                 AND event_end_date &lt;= #{event_end_date}
             </if>
             <if test="ongoingOnly != null and ongoingOnly == true">
-                AND REPLACE(event_end_date, '-', '') >= TO_CHAR(SYSDATE, 'YYYYMMDD')
+                AND REPLACE(event_end_date, '-', '') &gt;= TO_CHAR(SYSDATE, 'YYYYMMDD')
             </if>
         </where>
     </select>
