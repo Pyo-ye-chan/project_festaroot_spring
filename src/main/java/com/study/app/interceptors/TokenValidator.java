@@ -29,7 +29,9 @@ public class TokenValidator implements HandlerInterceptor {
 	    String path = request.getRequestURI();
 		
 	    // 토큰 검사X
-		if (path.startsWith("/api/festivals/top") || path.startsWith("/api/festivals/closing-soon")) {
+		if (path.startsWith("/api/festivals/top") 
+			|| path.startsWith("/api/festivals/closing-soon")
+			|| path.startsWith("/api/festivals/random")) {
 	        return true; 
 	    }
 

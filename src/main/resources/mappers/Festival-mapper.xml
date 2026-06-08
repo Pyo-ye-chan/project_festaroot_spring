@@ -269,6 +269,14 @@
 		)
 		WHERE ROWNUM &lt;= 3
 	</select>
+	
+	<!--랜덤 축제 추천-->
+	<select id="getRandomFestival" resultType="com.study.app.domains.festival.dto.FestivalDTO">
+	    SELECT * FROM (
+	        SELECT * FROM festival_info
+	        ORDER BY DBMS_RANDOM.VALUE
+	    ) WHERE ROWNUM = 1
+	</select>
 
     <select id="checkLikeExists" parameterType="map" resultType="int">
         SELECT COUNT(*) 

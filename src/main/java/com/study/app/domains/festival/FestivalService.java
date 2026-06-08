@@ -68,6 +68,11 @@ public class FestivalService {
 	public List<FestivalDTO> getClosingSoonFestivals() {
         return fdao.getClosingSoonFestivals();
     }
+	
+	// 홈 > 랜덤 축제 추천
+	public FestivalDTO getRandomFestival() {
+		return fdao.getRandomFestival();
+	}
 
 	public FestivalDTO selectByContentId(String contentId) {
 		return fdao.selectByContentId(contentId);

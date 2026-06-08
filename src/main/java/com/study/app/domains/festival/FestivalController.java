@@ -272,5 +272,15 @@ public class FestivalController {
 	        List<FestivalDTO> list = feServ.getClosingSoonFestivals();
 	        return ResponseEntity.ok(list);
 	    }
+		
+		// 랜덤 축제 추천
+		@GetMapping("/random")
+		public ResponseEntity<FestivalDTO> getRandomFestival() {
+			FestivalDTO festival = feServ.getRandomFestival();
+			if (festival == null) {
+				return ResponseEntity.noContent().build(); // 혹은 404 처리 원하면 .notFound().build()
+			}
+			return ResponseEntity.ok(festival);
+		}
 
 }

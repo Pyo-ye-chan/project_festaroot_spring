@@ -46,6 +46,11 @@ public class FestivalDAO {
 	public List<FestivalDTO> getClosingSoonFestivals() {
 	    return mybatis.selectList("Festival.getClosingSoonFestivals");
 	}
+	
+	// 홈 > 랜덤 축제 추천
+	public FestivalDTO getRandomFestival() {
+		return mybatis.selectOne("Festival.getRandomFestival");
+	}
 
 	public FestivalDTO selectByContentId(String contentId) {
 		return mybatis.selectOne("Festival.selectByContentId", contentId);
