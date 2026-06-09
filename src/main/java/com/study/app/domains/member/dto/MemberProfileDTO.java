@@ -11,6 +11,12 @@ public class MemberProfileDTO {
     private List<InterestThemeDTO> interestThemes;
     private List<UserActivityLogDTO> recentLogs;
     private List<Map<String, Object>> likedFestivals;
+    
+    // 성장 관련 추가 정보
+    private Integer level;
+    private String titleName;
+    private Long currentExp;
+    private Long nextLevelExp;
 
     public MemberProfileDTO() {}
 
@@ -22,6 +28,15 @@ public class MemberProfileDTO {
         this.recentLogs = recentLogs;
         this.likedFestivals = likedFestivals;
     }
+
+    public Integer getLevel() { return level; }
+    public void setLevel(Integer level) { this.level = level; }
+    public String getTitleName() { return titleName; }
+    public void setTitleName(String titleName) { this.titleName = titleName; }
+    public Long getCurrentExp() { return currentExp; }
+    public void setCurrentExp(Long currentExp) { this.currentExp = currentExp; }
+    public Long getNextLevelExp() { return nextLevelExp; }
+    public void setNextLevelExp(Long nextLevelExp) { this.nextLevelExp = nextLevelExp; }
 
     public List<Map<String, Object>> getLikedFestivals() {
         return likedFestivals;

@@ -234,7 +234,7 @@
     </select>
 
     <select id="getMyFestivalLikedDetails" parameterType="string" resultType="map">
-        SELECT f.CONTENT_ID, f.TITLE, f.OVERVIEW
+        SELECT f.*
         FROM FESTIVAL_INFO f
         JOIN FESTIVAL_LIKE l ON f.CONTENT_ID = l.CONTENT_ID
         WHERE l.MEMBER_ID = #{memberId}

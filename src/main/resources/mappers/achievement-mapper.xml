@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Achievement">
+
+    <!-- 미달성 업적 조회 (특정 타입) -->
+    <select id="getUnachievedAchievementsByType" resultType="com.study.app.domains.achievement.dto.AchievementDTO">
+        SELECT a.*
+        FROM ACHIEVEMENT a
+        LEFT JOIN USER_ACH_PROGRESS p ON a.ACHIEVEMENT_ID = p.ACHIEVEMENT_ID AND p.MEMBER_ID = #{memberId}
+        WHERE a.ACH_TYPE = #{achType}
+        AND (p.IS_ACHIEVED IS NULL OR p.IS_ACHIEVED = 'N')
+    </select>
+
+    <!-- 진행도 업데이트 (MERGE 사용) -->
+    <update id="upsertProgress">
+        MERGE INTO USER_ACH_PROGRESS p
+        USING DUAL
+        ON (p.MEMBER_ID = #{memberId} AND p.ACHIEVEMENT_ID = #{achievementId})
+        WHEN MATCHED THEN
+            UPDATE SET CURRENT_COUNT = CURRENT_COUNT + 1
+        WHEN NOT MATCHED THEN
+            INSERT (MEMBER_ID, ACHIEVEMENT_ID, CURRENT_COUNT, IS_ACHIEVED)
+            VALUES (#{memberId}, #{achievementId}, 1, 'N')
+    </update>
+
+    <!-- 진행도 조회 -->
+    <select id="getProgress" resultType="com.study.app.domains.achievement.dto.UserAchProgressDTO">
+        SELECT * FROM USER_ACH_PROGRESS 
+        WHERE MEMBER_ID = #{memberId} AND ACHIEVEMENT_ID = #{achievementId}
+    </select>
+
+    <!-- 달성 상태 업데이트 -->
+    <update id="updateAchievedStatus">
+        UPDATE USER_ACH_PROGRESS 
+        SET IS_ACHIEVED = 'Y' 
+        WHERE MEMBER_ID = #{memberId} AND ACHIEVEMENT_ID = #{achievementId}
+    </update>
+
+    <!-- 달성 이력 저장 -->
+    <insert id="insertAchievementHistory">
+        INSERT INTO USER_ACHIEVEMENT (MEMBER_ID, ACHIEVEMENT_ID, ACHIEVED_DATE)
+        VALUES (#{memberId}, #{achievementId}, SYSDATE)
+    </insert>
+
+    <!-- 경험치 추가 -->
+    <update id="addMemberExp">
+        UPDATE MEMBER 
+        SET EXP_POINT = NVL(EXP_POINT, 0) + #{expAmount}
+        WHERE MEMBER_ID = #{memberId}
+    </update>
+
+    <!-- 유저의 현재 경험치/레벨/칭호 조회 -->
+    <select id="getMemberExpAndLevel" resultType="map">
+        SELECT m.EXP_POINT, m.TITLE_ID, t.TITLE_NAME, l.CURRENT_LV
+        FROM MEMBER m
+        LEFT JOIN TITLE t ON m.TITLE_ID = t.TITLE_ID
+        LEFT JOIN (
+            SELECT MAX(CURRENT_LV) as CURRENT_LV, #{memberId} as m_id
+            FROM LEVEL_SYSTEM
+            WHERE REQUIRED_EXP &lt;= (SELECT NVL(EXP_POINT, 0) FROM MEMBER WHERE MEMBER_ID = #{memberId})
+        ) l ON m.MEMBER_ID = l.m_id
+        WHERE m.MEMBER_ID = #{memberId}
+    </select>
+
+    <!-- 다음 레벨 정보 조회 -->
+    <select id="getNextLevelInfo" resultType="com.study.app.domains.achievement.dto.LevelSystemDTO">
+        SELECT * FROM LEVEL_SYSTEM 
+        WHERE CURRENT_LV = #{currentLevel} + 1
+    </select>
+
+    <!-- 레벨 및 칭호 업데이트 -->
+    <update id="updateMemberLevelAndTitle">
+        UPDATE MEMBER 
+        SET TITLE_ID = #{titleId}
+        WHERE MEMBER_ID = #{memberId}
+    </update>
+
+    <!-- 총 달성 업적 개수 조회 -->
+    <select id="getAchievedCount" resultType="int">
+        SELECT COUNT(*) 
+        FROM USER_ACH_PROGRESS 
+        WHERE MEMBER_ID = #{memberId} AND IS_ACHIEVED = 'Y'
+    </select>
+
+    <!-- 특정 업적 조회 -->
+    <select id="getAchievementById" resultType="com.study.app.domains.achievement.dto.AchievementDTO">
+        SELECT * FROM ACHIEVEMENT WHERE ACHIEVEMENT_ID = #{achievementId}
+    </select>
+
+    <!-- 모든 업적 리스트와 유저의 진행 상태 조회 -->
+    <select id="getAllAchievementsWithProgress" resultType="map">
+        SELECT 
+            a.ACHIEVEMENT_ID,
+            a.ACH_TITLE,
+            a.ACH_DESC,
+            a.ACH_TYPE,
+            a.CONDITION_COUNT,
+            a.EXP_REWARD,
+            NVL(p.CURRENT_COUNT, 0) as CURRENT_COUNT,
+            NVL(p.IS_ACHIEVED, 'N') as IS_ACHIEVED,
+            ua.ACHIEVED_DATE
+        FROM ACHIEVEMENT a
+        LEFT JOIN USER_ACH_PROGRESS p ON a.ACHIEVEMENT_ID = p.ACHIEVEMENT_ID AND p.MEMBER_ID = #{memberId}
+        LEFT JOIN USER_ACHIEVEMENT ua ON a.ACHIEVEMENT_ID = ua.ACHIEVEMENT_ID AND ua.MEMBER_ID = #{memberId}
+        ORDER BY a.ACHIEVEMENT_ID ASC
+    </select>
+
+</mapper>

@@ -1,15 +1,14 @@
 package com.study.app.domains.member;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.sql.Clob;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import java.sql.Clob;
-import java.io.BufferedReader;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.study.app.domains.achievement.AchievementDAO;
+import com.study.app.domains.festival.FestivalDAO;
+import com.study.app.domains.achievement.dto.LevelSystemDTO;
+import com.study.app.domains.achievement.dto.UserAchProgressDTO;
 import com.study.app.domains.festival.FestivalDAO;
 import com.study.app.domains.member.dto.InterestRegionDTO;
 import com.study.app.domains.member.dto.InterestThemeDTO;
@@ -49,6 +52,9 @@ public class MemberService {
 
     @Autowired
     private FestivalDAO festivalDAO;
+    
+    @Autowired
+    private AchievementDAO achievementDAO;
 
     public MemberProfileDTO getProfile(String member_id) {
         MemberDTO member = memberDAO.selectMemberById(member_id);
@@ -57,6 +63,9 @@ public class MemberService {
         List<InterestRegionDTO> regions = memberDAO.selectInterestRegions(member_id);
         List<InterestThemeDTO> themes = memberDAO.selectInterestThemes(member_id);
         List<com.study.app.domains.activity.dto.UserActivityLogDTO> logs = userActivityLogDAO.selectRecentLogs(member_id);
+        
+        // 성장 정보 조회
+        Map<String, Object> expAndLevel = achievementDAO.getMemberExpAndLevel(member_id);
         
         // 찜한 축제 원본 데이터 (CLOB 포함 가능성 있음)
         List<Map<String, Object>> rawLikedFestivals = festivalDAO.getMyFestivalLikedDetails(member_id);
@@ -73,7 +82,23 @@ public class MemberService {
             }
         }
 
-        return new MemberProfileDTO(member, regions, themes, logs, likedFestivals);
+        MemberProfileDTO profile = new MemberProfileDTO(member, regions, themes, logs, likedFestivals);
+        
+        // 성장 정보 세팅
+        if (expAndLevel != null) {
+            Integer currentLv = expAndLevel.get("CURRENT_LV") != null ? ((Number) expAndLevel.get("CURRENT_LV")).intValue() : 1;
+            profile.setLevel(currentLv);
+            profile.setTitleName((String) expAndLevel.get("TITLE_NAME"));
+            profile.setCurrentExp(expAndLevel.get("EXP_POINT") != null ? ((Number) expAndLevel.get("EXP_POINT")).longValue() : 0L);
+            
+            // 다음 레벨 필요 경험치 조회
+            LevelSystemDTO nextLv = achievementDAO.getNextLevelInfo(currentLv);
+            if (nextLv != null) {
+                profile.setNextLevelExp(nextLv.getRequired_exp());
+            }
+        }
+
+        return profile;
     }
 
     private String convertToString(Object obj) {
