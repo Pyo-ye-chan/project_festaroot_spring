@@ -96,11 +96,16 @@ public class AchievementService {
     public List<AchievementResultDTO> processAttendance(String memberId) {
         log.info("출석 체크 처리 - 유저: {}", memberId);
         
-        // 1. 기본 활동 경험치 지급
-        addActivityExp(memberId, ActivityType.ATTENDANCE);
+        List<AchievementResultDTO> results = new ArrayList<>();
         
-        // 2. 출석 관련 업적 업데이트
-        return updateProgress(memberId, "ATTENDANCE");
+        // 1. 기본 활동 경험치 지급 (addActivityExp 내부에서 updateProgress("ATTENDANCE")를 호출함)
+        AchievementResultDTO activityResult = addActivityExp(memberId, ActivityType.ATTENDANCE);
+        results.add(activityResult);
+        
+        // 2. 추가적인 업적 체크가 필요하다면 여기서 수행할 수 있지만, 
+        // 이미 updateProgress가 호출되었으므로 바로 반환하면 됩니다.
+        
+        return results;
     }
 
     /**
@@ -185,13 +190,18 @@ public class AchievementService {
 
     /**
      * 모든 업적 클리어 여부 확인 (메타 업적)
+     * 일반 업적이 하나 달성될 때마다 호출되어 999번 업적의 진행도를 올립니다.
      */
     private void checkAllClear(String memberId, List<AchievementResultDTO> results) {
+        // 1. 999번 업적의 진행도를 1 올림 (일반 업적 하나가 달성되었으므로)
+        achievementDAO.upsertProgress(memberId, 999L);
+
+        // 2. 현재 총 달성 개수 확인 (999번은 아직 'Y'가 아니므로 순수 일반 업적 개수)
         int achievedCount = achievementDAO.getAchievedCount(memberId);
         
         // 주신 리스트 기준, ALL_CLEAR 제외 총 24개의 업적이 있음
         if (achievedCount == 24) {
-            AchievementDTO allClearAch = achievementDAO.getAchievementById(999L); // 999: 전설의 인디아나 존스
+            AchievementDTO allClearAch = achievementDAO.getAchievementById(999L);
             if (allClearAch != null) {
                 // 이미 달성했는지 한 번 더 체크 (방어 로직)
                 List<AchievementDTO> check = achievementDAO.getUnachievedAchievementsByType(memberId, "ALL_CLEAR");

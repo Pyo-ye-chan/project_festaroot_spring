@@ -35,6 +35,9 @@ public class FestivalService {
 	private FestivalDAO fdao;
 
 	@Autowired
+	private com.study.app.domains.achievement.AchievementService achievementService;
+
+	@Autowired
 	private RestTemplate restTemplate;
 
 	@Value("${kto.service.key}")
@@ -732,7 +735,10 @@ public class FestivalService {
 
 	// 로그인 기준 축제 찜 분기 처리
 	@Transactional
-	public boolean toggleFestivalLike(String memberId, Long contentId) {
+	public Map<String, Object> toggleFestivalLike(String memberId, Long contentId) {
+		Map<String, Object> result = new HashMap<>();
+		List<com.study.app.domains.achievement.dto.AchievementResultDTO> achievementResults = new ArrayList<>();
+		
 		Map<String, Object> toggle = new HashMap<>();
 		toggle.put("member_id", memberId);
 		toggle.put("content_id", contentId);
@@ -740,25 +746,34 @@ public class FestivalService {
 		// 이미 찜했는지 개수 확인 (0 또는 1)
 		int count = fdao.checkLikeExists(toggle);
 
+		boolean isLiked;
 		if (count == 0) {
 			// 찜 안 되어 있으면 찜 추가 + 총 찜 개수 증가
 			fdao.insertLike(toggle);
 			fdao.incrementLikeCount(contentId);
-			return true; // 최종 상태: 찜 됨
+			isLiked = true;
+			
+			// 업적 체크: 찜 추가 시에만 수행
+			achievementResults = achievementService.updateProgress(memberId, "FESTIVAL_LIKE");
 		} else {
 			// 이미 찜 되어 있음 ➡️ 찜 삭제 + 총 찜 개수 감소
 			fdao.deleteLike(toggle);
 			fdao.decrementLikeCount(contentId);
-			return false; // 최종 상태: 찜 취소됨
+			isLiked = false;
 		}
+		
+		result.put("isLiked", isLiked);
+		result.put("achievements", achievementResults);
+		
+		return result;
 	}
 	
 	// 특정 축제의 실시간 총 찜 개수 조회 (실무형 방어 코드 포함)
-		@Transactional(readOnly = true)
-		public int getFestivalLikeCount(Long contentId) {
-			if (contentId == null) {
-				return 0;
-			}
-			return fdao.getFestivalLikeCount(contentId);
+	@Transactional(readOnly = true)
+	public int getFestivalLikeCount(Long contentId) {
+		if (contentId == null) {
+			return 0;
 		}
+		return fdao.getFestivalLikeCount(contentId);
+	}
 }

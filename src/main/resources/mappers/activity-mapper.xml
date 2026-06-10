@@ -48,4 +48,12 @@
         WHERE ROWNUM &lt;= 10
     </select>
 
+    <select id="checkTodayAttendance" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM USER_ACTIVITY_LOG
+        WHERE MEMBER_ID = #{member_id}
+          AND ACTION_TYPE = 'ATTENDANCE'
+          AND TRUNC(CREATED_AT) = TRUNC(SYSDATE)
+    </select>
+
 </mapper>

@@ -66,4 +66,10 @@ public class MemberController {
         }
     }
 
+    @PostMapping("/attendance/{id}")
+    public ResponseEntity<Map<String, Object>> processAttendance(@PathVariable("id") String id) {
+        Map<String, Object> result = memberService.checkAndProcessAttendance(id);
+        return ResponseEntity.ok(result);
+    }
+
 }

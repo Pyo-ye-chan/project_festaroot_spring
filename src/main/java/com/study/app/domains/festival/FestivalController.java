@@ -248,12 +248,14 @@ public class FestivalController {
 		    }
 
 		    Long contentId = Long.parseLong(String.valueOf(contentIdObj));
-		    boolean isLiked = feServ.toggleFestivalLike(memberId, contentId);
+		    Map<String, Object> toggleResult = feServ.toggleFestivalLike(memberId, contentId);
+		    boolean isLiked = (boolean) toggleResult.get("isLiked");
 		    int updatedLikeCount = feServ.getFestivalLikeCount(contentId); 
 
 		    Map<String, Object> responseMap = new HashMap<>();
 		    responseMap.put("isLiked", isLiked);
 		    responseMap.put("like_count", updatedLikeCount); // ⭕ 최신 좋아요 카운트 추가 반환
+		    responseMap.put("achievements", toggleResult.get("achievements")); // ⭕ 업적 결과 추가
 		    responseMap.put("message", isLiked ? "찜 목록에 추가되었습니다." : "찜 목록에서 제거되었습니다.");
 
 		    return ResponseEntity.ok(responseMap);

@@ -243,4 +243,36 @@ public class MemberService {
         response.put("achievements", achievementResults);
         return response;
     }
+
+    /**
+     * 출석 체크를 처리하고 업적 결과를 반환합니다.
+     */
+    @Transactional
+    public Map<String, Object> checkAndProcessAttendance(String memberId) {
+        Map<String, Object> response = new HashMap<>();
+        List<com.study.app.domains.achievement.dto.AchievementResultDTO> achievements = new ArrayList<>();
+        
+        // 1. 오늘 이미 출석했는지 확인
+        int todayLogCount = userActivityLogDAO.checkTodayAttendance(memberId);
+        
+        if (todayLogCount == 0) {
+            // 2. 오늘 첫 방문이라면 로그 저장
+            com.study.app.domains.activity.dto.UserActivityLogDTO log = new com.study.app.domains.activity.dto.UserActivityLogDTO();
+            log.setMember_id(memberId);
+            log.setAction_type("ATTENDANCE");
+            userActivityLogDAO.insertLog(log);
+            
+            // 3. 업적 서비스 호출 (경험치 지급 및 업적 체크)
+            achievements = achievementService.processAttendance(memberId);
+            
+            response.put("success", true);
+            response.put("message", "출석 체크 완료!");
+        } else {
+            response.put("success", false);
+            response.put("message", "이미 오늘 출석 체크를 하셨습니다.");
+        }
+        
+        response.put("achievements", achievements);
+        return response;
+    }
 }
