@@ -53,14 +53,9 @@
 
     <!-- 유저의 현재 경험치/레벨/칭호 조회 -->
     <select id="getMemberExpAndLevel" resultType="map">
-        SELECT m.EXP_POINT, m.TITLE_ID, t.TITLE_NAME, l.CURRENT_LV
+        SELECT m.EXP_POINT, m.TITLE_ID, t.TITLE_NAME, m.CURRENT_LV
         FROM MEMBER m
         LEFT JOIN TITLE t ON m.TITLE_ID = t.TITLE_ID
-        LEFT JOIN (
-            SELECT MAX(CURRENT_LV) as CURRENT_LV, #{memberId} as m_id
-            FROM LEVEL_SYSTEM
-            WHERE REQUIRED_EXP &lt;= (SELECT NVL(EXP_POINT, 0) FROM MEMBER WHERE MEMBER_ID = #{memberId})
-        ) l ON m.MEMBER_ID = l.m_id
         WHERE m.MEMBER_ID = #{memberId}
     </select>
 
@@ -73,7 +68,8 @@
     <!-- 레벨 및 칭호 업데이트 -->
     <update id="updateMemberLevelAndTitle">
         UPDATE MEMBER 
-        SET TITLE_ID = #{titleId}
+        SET CURRENT_LV = #{newLevel},
+            TITLE_ID = #{titleId}
         WHERE MEMBER_ID = #{memberId}
     </update>
 
