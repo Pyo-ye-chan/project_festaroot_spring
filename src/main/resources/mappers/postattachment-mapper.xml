@@ -12,6 +12,21 @@
 
 </insert>
 
+<select id="selectPostAttachByPostId" resultType="com.study.app.domains.board.dto.PostAttachmentDTO">
+    SELECT * FROM POST_ATTACHMENT WHERE POST_ID = #{post_id}
+</select>
+
+<delete id="deletePostAttachByPostId">
+	DELETE FROM POST_ATTACHMENT WHERE POST_ID = #{post_id}
+</delete>
+
+<select id="selectPostAttachById" resultType="com.study.app.domains.board.dto.PostAttachmentDTO">
+    SELECT * FROM POST_ATTACHMENT WHERE ATTACH_ID = #{attach_id}
+</select>
+
+<delete id="deletePostAttachById">
+	DELETE FROM POST_ATTACHMENT WHERE ATTACH_ID = #{attach_id}
+</delete>
 
 
 </mapper>

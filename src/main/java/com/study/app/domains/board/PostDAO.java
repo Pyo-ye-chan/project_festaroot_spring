@@ -39,5 +39,13 @@ public class PostDAO {
 	public CommunityPostDTO selectById(Long id) {
 		return mybatis.selectOne("Board.selectById", id);
 	}
+	
+	public void updatePostById(CommunityPostDTO dto) {
+		mybatis.update("Board.updatePostById", dto);
+	}
+	
+	public void deletePostById(Long id) {
+		mybatis.delete("Board.deletePostById", id);
+	}
 
 }

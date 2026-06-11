@@ -27,8 +27,19 @@
 </select>
 
 <select id="selectById" resultType="com.study.app.domains.board.dto.CommunityPostDTO">
-	select * from community_post where post_id = #{id}
+	select cp.post_id, cp.member_id, cp.category, cp.title, cp.content, cp.like_count, cp.view_count,
+	 cp.created_at, m.nickname
+	 from community_post cp left join member m on cp.member_id = m.member_id
+	 where cp.post_id = #{id}
 </select>
+
+<update id="updatePostById">
+	update community_post set title = #{title}, content = #{content} where post_id = #{post_id} 
+</update>
+
+<delete id="deletePostById">
+	delete community_post board where post_id = #{id}
+</delete>
 
 
 </mapper>
