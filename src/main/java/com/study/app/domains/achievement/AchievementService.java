@@ -161,30 +161,29 @@ public class AchievementService {
      * 경험치 추가 및 레벨업 로직
      */
     private void addExpAndCheckLevelUp(String memberId, Integer expReward, AchievementResultDTO result) {
-        // 경험치 추가
+        // 1. 경험치 추가
         achievementDAO.addMemberExp(memberId, expReward);
         
-        // 현재 정보 조회
+        // 2. 현재 DB에 저장된 정보 조회 (저장된 레벨 확인용)
         Map<String, Object> currentStatus = achievementDAO.getMemberExpAndLevel(memberId);
         if (currentStatus == null) return;
 
         Long currentExp = ((Number) currentStatus.get("EXP_POINT")).longValue();
-        Integer currentLv = ((Number) currentStatus.get("CURRENT_LV")).intValue();
+        Integer storedLv = ((Number) currentStatus.get("CURRENT_LV")).intValue();
         
-        // 다음 레벨 정보 확인
-        LevelSystemDTO nextLvInfo = achievementDAO.getNextLevelInfo(currentLv);
+        // 3. 다음 레벨 정보 확인
+        LevelSystemDTO nextLvInfo = achievementDAO.getNextLevelInfo(storedLv);
         
+        // 4. 레벨업 판단: 현재 경험치가 다음 레벨 필요 경험치 이상인 경우
         if (nextLvInfo != null && currentExp >= nextLvInfo.getRequired_exp()) {
-            // 레벨업 조건 충족!
+            // 레벨업 조건 충족! DB 업데이트
             achievementDAO.updateMemberLevelAndTitle(memberId, nextLvInfo.getCurrent_lv(), nextLvInfo.getTitle_id());
             
             // 결과에 레벨업 정보 기록
             result.setLeveled_up(true);
             result.setNew_level(nextLvInfo.getCurrent_lv());
             
-            // 새 칭호 정보 조회 (필요 시)
-            // result.setNew_title(...);
-            log.info("레벨업! 유저: {}, 새 레벨: {}", memberId, nextLvInfo.getCurrent_lv());
+            log.info("레벨업 완료! 유저: {}, 레벨: {} -> {}", memberId, storedLv, nextLvInfo.getCurrent_lv());
         }
     }
 
