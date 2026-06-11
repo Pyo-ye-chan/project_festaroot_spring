@@ -203,11 +203,12 @@ public class FestivalController {
 	
 	// 축제 상세보기
 	@GetMapping("/detail/{contentId}")
-	public ResponseEntity<FestDetailDTO> getFestivalDetail(@PathVariable String contentId) {
-		FestDetailDTO dto = feServ.getFestivalDetail(contentId);
+	public ResponseEntity<FestivalDTO> getFestivalDetail(@PathVariable String contentId) {
+		FestivalDTO dto = feServ.getFestivalDetail(contentId);
 		if(dto != null && dto.getHomepage() != null) {
 			dto.setHomepage(extractHomepageUrl(dto.getHomepage()));
 		}
+		
 		return ResponseEntity.ok(dto);
 	}
 

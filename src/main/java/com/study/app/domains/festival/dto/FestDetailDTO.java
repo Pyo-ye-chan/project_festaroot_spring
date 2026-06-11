@@ -1,5 +1,9 @@
 package com.study.app.domains.festival.dto;
 
+import java.util.List;
+
+import com.study.app.domains.theme.ThemeMasterDTO;
+
 public class FestDetailDTO {
 	
     private Long content_id;
@@ -31,6 +35,8 @@ public class FestDetailDTO {
     private Long like_count;
     private Long review_count;
     private Double rating_avg;
+    
+    private List<ThemeMasterDTO> themes;
 
     public FestDetailDTO() {}
 
@@ -256,6 +262,14 @@ public class FestDetailDTO {
 
 	public void setRating_avg(Double rating_avg) {
 		this.rating_avg = rating_avg;
+	}
+
+	public java.util.List<com.study.app.domains.theme.ThemeMasterDTO> getThemes() {
+		return themes;
+	}
+
+	public void setThemes(java.util.List<com.study.app.domains.theme.ThemeMasterDTO> themes) {
+		this.themes = themes;
 	}
     
     

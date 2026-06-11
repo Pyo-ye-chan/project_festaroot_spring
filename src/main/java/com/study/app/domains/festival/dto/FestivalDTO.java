@@ -61,6 +61,7 @@ public class FestivalDTO {
     // 평균 평점 (예: 4.50)
     private Double rating_avg;
     
+    // 테마 정보
     private List<ThemeMasterDTO> themes;
     
     public FestivalDTO() {}

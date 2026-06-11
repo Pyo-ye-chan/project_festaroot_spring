@@ -677,8 +677,8 @@ public class FestivalService {
 	}
 	
 	// 축제 상세보기 정보 가져오기
-	public FestDetailDTO getFestivalDetail(String contentId) {
-		FestDetailDTO dto = fdao.selectDeatilByContentId(contentId);
+	public FestivalDTO getFestivalDetail(String contentId) {
+		FestivalDTO dto = fdao.selectDeatilByContentId(contentId);
 		if(dto != null && dto.getHomepage() != null) {
 			dto.setHomepage(extractHomepageUrl(dto.getHomepage()));
 		}
