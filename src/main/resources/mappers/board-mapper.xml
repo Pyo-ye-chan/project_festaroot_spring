@@ -15,6 +15,20 @@
 	0, 0, sysdate, sysdate)
 </insert>
 
+<select id="selectCount" resultType="int">
+	select count(*) from community_post
+</select>
+
+
+<select id="selectList" resultType="com.study.app.domains.board.dto.CommunityPostDTO">
+	select * from (select cp.post_id, cp.member_id, cp.category, cp.title, cp.content, cp.created_at, m.nickname, row_number() over (order by cp.post_id desc) as find_num
+	 from community_post cp left join member m on cp.member_id = m.member_id)
+	 where find_num between #{startNum} and #{endNum} 
+</select>
+
+<select id="selectById" resultType="com.study.app.domains.board.dto.CommunityPostDTO">
+	select * from community_post where post_id = #{id}
+</select>
 
 
 </mapper>

@@ -18,17 +18,28 @@ public class BoardService {
 	private FileDAO fileDAO;
 	
 	public void addPost(CommunityPostDTO dto, List<MultipartFile> files) {
-		System.out.println(dto.getPost_id());
 		postDAO.insertPost(dto);
-		System.out.println(dto.getPost_id());
+		
 		Long boardSeq = dto.getPost_id();
 		
-		fileDAO.insertPostAttachments(boardSeq, files);	
+		if(files != null && !files.isEmpty()) {
+			fileDAO.insertPostAttachments(boardSeq, files);	
+		}
+		
+		
 		
 	}
 	
 	public int totalPostCount() {
 		return postDAO.selectCount();
+	}
+	
+	public List<CommunityPostDTO> getStartEnd(Long startNum, Long endNum){
+		return postDAO.selectList(startNum, endNum);
+	}
+	
+	public CommunityPostDTO getPostDetail(Long id) {
+		return postDAO.selectById(id);
 	}
 
 }

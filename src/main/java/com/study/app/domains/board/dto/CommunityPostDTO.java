@@ -14,11 +14,15 @@ public class CommunityPostDTO {
     private Long report_count;
     private LocalDate created_at;
     private LocalDate updated_at;
+    
+    // 닉네임
+    private String nickname;
 
     public CommunityPostDTO() {}
 
 	public CommunityPostDTO(Long post_id, String member_id, String category, String title, String content,
-			Long view_count, Long like_count, Long report_count, LocalDate created_at, LocalDate updated_at) {
+			Long view_count, Long like_count, Long report_count, LocalDate created_at, LocalDate updated_at,
+			String nickname) {
 		super();
 		this.post_id = post_id;
 		this.member_id = member_id;
@@ -30,6 +34,7 @@ public class CommunityPostDTO {
 		this.report_count = report_count;
 		this.created_at = created_at;
 		this.updated_at = updated_at;
+		this.nickname = nickname;
 	}
 
 	public Long getPost_id() {
@@ -112,9 +117,15 @@ public class CommunityPostDTO {
 		this.updated_at = updated_at;
 	}
 
+	public String getNickname() {
+		return nickname;
+	}
 
-    
-    
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	
     
 
 }
