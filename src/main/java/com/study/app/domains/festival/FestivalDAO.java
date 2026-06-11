@@ -66,7 +66,7 @@ public class FestivalDAO {
 		return mybatis.update("Festival.updateFestivalDetail", dto);
 	}
 
-	public FestDetailDTO selectDeatilByContentId(String contentId) {
+	public FestivalDTO selectDeatilByContentId(String contentId) {
 		return mybatis.selectOne("Festival.selectDetailByContentId", contentId);
 	}
 

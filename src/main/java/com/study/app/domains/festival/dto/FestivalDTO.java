@@ -1,5 +1,9 @@
 package com.study.app.domains.festival.dto;
 
+import java.util.List;
+
+import com.study.app.domains.theme.ThemeMasterDTO;
+
 public class FestivalDTO {
 	
 	// 콘텐츠 ID / TourAPI 고유 식별자 (PK)
@@ -56,6 +60,9 @@ public class FestivalDTO {
     
     // 평균 평점 (예: 4.50)
     private Double rating_avg;
+    
+    // 테마 정보
+    private List<ThemeMasterDTO> themes;
     
     public FestivalDTO() {}
     
@@ -290,6 +297,14 @@ public class FestivalDTO {
 
 	public void setRating_avg(Double rating_avg) {
 		this.rating_avg = rating_avg;
+	}
+
+	public List<ThemeMasterDTO> getThemes() {
+		return themes;
+	}
+
+	public void setThemes(List<ThemeMasterDTO> themes) {
+		this.themes = themes;
 	}
 
 

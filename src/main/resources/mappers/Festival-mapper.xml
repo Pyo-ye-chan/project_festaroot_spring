@@ -4,18 +4,73 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
   <mapper namespace="Festival">
   
-  	<select id="getAll" resultType="com.study.app.domains.festival.dto.FestivalDTO">
-  		select * from festival_info
+  	<resultMap id="festivalWithThemesMap" type="com.study.app.domains.festival.dto.FestivalDTO">
+  		<id property="content_id" column="content_id" />
+  		<result property="title" column="title" />
+  		<result property="addr1" column="addr1" />
+  		<result property="addr2" column="addr2" />
+  		<result property="region_code" column="region_code" />
+  		<result property="sigungu_code" column="sigungu_code" />
+  		<result property="first_image" column="first_image" />
+  		<result property="first_image2" column="first_image2" />
+  		<result property="map_x" column="map_x" />
+  		<result property="map_y" column="map_y" />
+  		<result property="map_level" column="map_level" />
+  		<result property="event_start_date" column="event_start_date" />
+  		<result property="event_end_date" column="event_end_date" />
+  		<result property="overview" column="overview" jdbcType="CLOB" />
+  		<result property="spon_place" column="spon_place" />
+  		<result property="use_time_festival" column="use_time_festival" />
+  		<result property="sponsor1_tel" column="sponsor1_tel" />
+  		<result property="homepage" column="homepage" jdbcType="CLOB" />
+  		<result property="created_time" column="created_time" />
+  		<result property="modified_time" column="modified_time" />
+  		<result property="indexed_modified_time" column="indexed_modified_time" />
+  		<result property="view_count" column="view_count" />
+  		<result property="like_count" column="like_count" />
+  		<result property="review_count" column="review_count" />
+  		<result property="rating_avg" column="rating_avg" />
+  		<collection property="themes" ofType="com.study.app.domains.theme.ThemeMasterDTO">
+  			<result property="theme_code" column="theme_code" />
+  			<result property="theme_name" column="theme_name" />
+  		</collection>
+  	</resultMap>
+
+  	<select id="getAll" resultMap="festivalWithThemesMap" >
+  		SELECT 
+	        f.*,           
+	        tm.theme_code, 
+	        tm.theme_name  
+	    FROM festival_info f
+	    LEFT JOIN festival_themes ft ON f.content_id = ft.content_id       
+	    LEFT JOIN theme_master tm ON ft.theme_code = tm.theme_code
   	</select>
   	
-  	<select id="selectByContentId" resultType="com.study.app.domains.festival.dto.FestivalDTO">
-  		select * from festival_info where content_id = #{content_id}
+  	<select id="selectByContentId" resultMap="festivalWithThemesMap">
+  		SELECT 
+	        f.*,           
+	        tm.theme_code, 
+	        tm.theme_name  
+	    FROM festival_info f
+	    LEFT JOIN festival_themes ft ON f.content_id = ft.content_id       
+	    LEFT JOIN theme_master tm ON ft.theme_code = tm.theme_code 
+	    WHERE f.content_id = #{content_id}
   	</select>
   	
+	
+
 	<!--축제 상세보기-->
-  	<select id="selectDetailByContentId" resultType="com.study.app.domains.festival.dto.FestDetailDTO">
-  		select * from festival_info where content_id = #{content_id}
-  	</select>
+	<select id="selectDetailByContentId" resultMap="festivalWithThemesMap">
+		SELECT 
+	f.*,           
+	tm.theme_code, 
+	tm.theme_name  
+	FROM festival_info f
+	LEFT JOIN festival_themes ft ON f.content_id = ft.content_id       
+	LEFT JOIN theme_master tm ON ft.theme_code = tm.theme_code
+	WHERE f.content_id = #{content_id}
+	</select>
+
   	
   	
 	<!--축제 정보 update 또는 insert <상세내용 추가>-->
@@ -110,75 +165,84 @@
 	<!--축제 찾기 검색 조건-->
     <select id="selectByOptions"
             parameterType="com.study.app.domains.festival.dto.FestivalSearchDTO"
-            resultType="com.study.app.domains.festival.dto.FestivalDTO">
+            resultMap="festivalWithThemesMap">
 
         <bind name="startRow" value="(page - 1) * size + 1" />
         <bind name="endRow" value="page * size" />
 
-        SELECT * FROM (
-            SELECT ROWNUM AS rnum, res.* FROM (
-                
-                SELECT * FROM festival_info
-                <where>
-                    <if test="keyword != null and keyword != ''">
-                        <choose>
-                            <when test="searchScope == 'all'">
-                                AND (
-                                    title LIKE '%' || #{keyword} || '%' 
-                                    OR 
-                                    (overview IS NOT NULL AND overview LIKE '%' || #{keyword} || '%')
-                                )
-                            </when>
-                            <otherwise>
-                                AND title LIKE '%' || #{keyword} || '%'
-                            </otherwise>
-                        </choose>
-                    </if>
-                    <if test="region_code != null and region_code != ''">
-                        AND region_code = #{region_code}
-                    </if>
-                    <if test="sigungu_code != null and sigungu_code != ''">
-                        AND sigungu_code = #{sigungu_code}
-                    </if>
-                    <if test="event_start_date != null and event_start_date != ''">
-                        AND event_start_date &gt;= #{event_start_date}
-                    </if>
-                    <if test="event_end_date != null and event_end_date != ''">
-                        AND event_end_date &lt;= #{event_end_date}
-                    </if>
-                    <if test="ongoingOnly != null and ongoingOnly == true">
-                        AND REPLACE(event_end_date, '-', '') &gt;= TO_CHAR(SYSDATE, 'YYYYMMDD')
-                    </if>
-                </where>
-                
-                <choose>
-                    <when test="sort == 'views'">
-                        ORDER BY view_count DESC
-                    </when>
-					<when test="sort == 'popular'">
-					    ORDER BY (NVL(like_count, 0) + (NVL(rating_avg, 0) * 10)) DESC, 
-					             NVL(like_count, 0) DESC, 
-					             created_time DESC
-					</when>
-                    <when test="sort == 'date'">
-                        ORDER BY event_start_date ASC
-                    </when>
-                    <!-- 최근 시작일 기준 정렬 (내림차순) -->
-				    <when test="sort == 'recentStart'">
-				        ORDER BY event_start_date ASC, created_time DESC
-				    </when>
-                    <when test="sort == 'title'">
-                        ORDER BY title ASC
-                    </when>
-                    <otherwise>
-                        ORDER BY created_time DESC
-                    </otherwise>
-                </choose>
-                
+        SELECT 
+            final_res.*,
+            tm.theme_code,
+            tm.theme_name
+        FROM (
+            SELECT * FROM (
+                SELECT ROWNUM AS rnum, res.* FROM (
+                    
+                    SELECT * FROM festival_info
+                    <where>
+                        <if test="keyword != null and keyword != ''">
+                            <choose>
+                                <when test="searchScope == 'all'">
+                                    AND (
+                                        title LIKE '%' || #{keyword} || '%' 
+                                        OR 
+                                        (overview IS NOT NULL AND overview LIKE '%' || #{keyword} || '%')
+                                    )
+                                </when>
+                                <otherwise>
+                                    AND title LIKE '%' || #{keyword} || '%'
+                                </otherwise>
+                            </choose>
+                        </if>
+                        <if test="region_code != null and region_code != ''">
+                            AND region_code = #{region_code}
+                        </if>
+                        <if test="sigungu_code != null and sigungu_code != ''">
+                            AND sigungu_code = #{sigungu_code}
+                        </if>
+                        <if test="event_start_date != null and event_start_date != ''">
+                            AND event_start_date &gt;= #{event_start_date}
+                        </if>
+                        <if test="event_end_date != null and event_end_date != ''">
+                            AND event_end_date &lt;= #{event_end_date}
+                        </if>
+                        <if test="ongoingOnly != null and ongoingOnly == true">
+                            AND REPLACE(event_end_date, '-', '') &gt;= TO_CHAR(SYSDATE, 'YYYYMMDD')
+                        </if>
+                    </where>
+                    
+                    <choose>
+                        <when test="sort == 'views'">
+                            ORDER BY view_count DESC
+                        </when>
+                        <when test="sort == 'popular'">
+                            ORDER BY (NVL(like_count, 0) + (NVL(rating_avg, 0) * 10)) DESC, 
+                                     NVL(like_count, 0) DESC, 
+                                     created_time DESC
+                        </when>
+                        <when test="sort == 'date'">
+                            ORDER BY event_start_date ASC
+                        </when>
+                        <!-- 최근 시작일 기준 정렬 (내림차순) -->
+                        <when test="sort == 'recentStart'">
+                            ORDER BY event_start_date ASC, created_time DESC
+                        </when>
+                        <when test="sort == 'title'">
+                            ORDER BY title ASC
+                        </when>
+                        <otherwise>
+                            ORDER BY created_time DESC
+                        </otherwise>
+                    </choose>
+                    
                 ) res
-            WHERE ROWNUM &lt;= #{endRow}
-        )
-        WHERE rnum &gt;= #{startRow}
+                WHERE ROWNUM &lt;= #{endRow}
+            )
+            WHERE rnum &gt;= #{startRow}
+        ) final_res
+        LEFT JOIN festival_themes ft ON final_res.content_id = ft.content_id
+        LEFT JOIN theme_master tm ON ft.theme_code = tm.theme_code
+        ORDER BY final_res.rnum ASC
     </select>
 
 	<!--축제 찾기 네비게이터 카운트-->

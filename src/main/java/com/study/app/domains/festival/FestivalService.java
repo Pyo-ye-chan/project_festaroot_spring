@@ -192,7 +192,20 @@ public class FestivalService {
 					dto.setExpguide(data.path("expguide").asText());
 					dto.setExpagerange(data.path("expagerange").asText());
 					specificInfo = (T) dto;
-				} else if ("15".equals(contentTypeId)) { // 행사/축제
+				} else if ("14".equals(contentTypeId)) { // 문화시설
+					com.study.app.domains.festival.dto.CultureFacilityDTO dto = new com.study.app.domains.festival.dto.CultureFacilityDTO();
+					dto.setInfocenterculture(data.path("infocenterculture").asText());
+					dto.setUsetimeculture(data.path("usetimeculture").asText());
+					dto.setRestdateculture(data.path("restdateculture").asText());
+					dto.setUsefee(data.path("usefee").asText());
+					dto.setParkingculture(data.path("parkingculture").asText());
+					dto.setChkpetculture(data.path("chkpetculture").asText());
+					dto.setChkbabycarriageculture(data.path("chkbabycarriageculture").asText());
+					dto.setSpendtime(data.path("spendtime").asText());
+					specificInfo = (T) dto;
+				}
+				/* 
+				else if ("15".equals(contentTypeId)) { // 행사/축제
 					EventPlaceDTO dto = new EventPlaceDTO();
 					dto.setEventstartdate(data.path("eventstartdate").asText());
 					dto.setEventenddate(data.path("eventenddate").asText());
@@ -208,6 +221,7 @@ public class FestivalService {
 					dto.setSponsor1tel(data.path("sponsor1tel").asText());
 					specificInfo = (T) dto;
 				}
+				*/
 			}
 
 			return new PlaceDetailResponse<>(commonInfo, specificInfo);
@@ -677,8 +691,8 @@ public class FestivalService {
 	}
 	
 	// 축제 상세보기 정보 가져오기
-	public FestDetailDTO getFestivalDetail(String contentId) {
-		FestDetailDTO dto = fdao.selectDeatilByContentId(contentId);
+	public FestivalDTO getFestivalDetail(String contentId) {
+		FestivalDTO dto = fdao.selectDeatilByContentId(contentId);
 		if(dto != null && dto.getHomepage() != null) {
 			dto.setHomepage(extractHomepageUrl(dto.getHomepage()));
 		}
