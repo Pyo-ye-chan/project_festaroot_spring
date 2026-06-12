@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PostComment">
+
+
+    <!-- 댓글 등록 -->
+    <insert id="insertComment">
+        INSERT INTO POST_COMMENT (
+            comment_id,
+            post_id,
+            member_id,
+            content,
+            parent_comment_id,
+            created_at,
+            updated_at
+        ) VALUES (
+            seq_post_comment.NEXTVAL,
+            #{post_id},
+            #{member_id},
+            #{content},
+            #{parent_comment_id},
+            SYSDATE,
+            SYSDATE
+        )
+    </insert>
+
+    <!-- 특정 게시글 댓글 전체 조회 -->
+    <select id="selectCommentsByPostId"
+            resultType="com.study.app.domains.board.dto.PostCommentDTO">
+        SELECT
+            pc.comment_id,
+            pc.post_id,
+            pc.member_id,
+            pc.content,
+            pc.parent_comment_id,
+            pc.created_at,
+            pc.updated_at,
+            m.nickname
+        FROM POST_COMMENT pc
+        LEFT JOIN MEMBER m
+            ON pc.member_id = m.member_id
+        WHERE pc.post_id = #{post_id}
+        ORDER BY
+            NVL(pc.parent_comment_id, pc.comment_id),
+            pc.created_at
+    </select>
+
+    <!-- 댓글 수정 -->
+    <update id="updateComment">
+        UPDATE POST_COMMENT
+        SET
+            content = #{content},
+            updated_at = SYSDATE
+        WHERE comment_id = #{comment_id}
+          AND member_id = #{member_id}
+    </update>
+    
+    <!-- 대댓글 삭제 -->
+    <delete id="deleteChildComments">
+    DELETE FROM POST_COMMENT
+    WHERE parent_comment_id = #{comment_id}
+	</delete>
+
+    <!-- 댓글 삭제 -->
+    <delete id="deleteComment">
+        DELETE FROM POST_COMMENT
+        WHERE comment_id = #{comment_id}
+          AND member_id = #{member_id}
+    </delete>
+
+
+</mapper>

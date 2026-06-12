@@ -17,61 +17,74 @@ import com.study.app.domains.storage.StorageController;
 
 @Repository
 public class FileDAO {
-	
+
 	@Autowired
 	private SqlSessionTemplate mybatis;
-	
+
 	@Autowired
 	private Storage storage;
-	
-	@Autowired
-	private StorageController storageController;
-	
+
 	@Value("${gcp.bucket-name}")
 	private String bucketName;
-	
+
 	public void insertPostAttachments(Long post_id, List<MultipartFile> files) {
 
-	    for (MultipartFile file : files) {
-	        if (!file.isEmpty()) {
-	            try {
-	                String originalName = file.getOriginalFilename();
+		for (MultipartFile file : files) {
+			if (!file.isEmpty()) {
+				try {
+					String originalName = file.getOriginalFilename();
 
-	                String sysName = "board/file/" 
-	                        + UUID.randomUUID().toString() 
-	                        + "_" 
-	                        + originalName;
+					String sysName = "board/file/" + UUID.randomUUID().toString() + "_" + originalName;
 
-	                BlobId blobId = BlobId.of(bucketName, sysName);
+					BlobId blobId = BlobId.of(bucketName, sysName);
 
-	                BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
-	                        .setContentType(file.getContentType())
-	                        .build();
+					BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getContentType()).build();
 
-	                storage.create(blobInfo, file.getBytes());
+					storage.create(blobInfo, file.getBytes());
 
-	                String fileUrl = storageController.uploadFile(file, "board/file");
+					PostAttachmentDTO attachmentDTO = new PostAttachmentDTO();
 
-	                PostAttachmentDTO attachmentDTO = new PostAttachmentDTO(
+					mybatis.insert("PostAttachment.insertFiles", attachmentDTO);
 
-	                        post_id,
-	                        originalName,
-	                        fileUrl,
-	                        file.getSize(),
-	                        file.getContentType()
-
-	                );
-
-	                mybatis.insert("PostAttachment.insertFiles", attachmentDTO);
-
-	            } catch (Exception e) {
-	                e.printStackTrace();
-	            }
-	        }
-	    }
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
-	
-	
-	
+
+	public void deletePostAttachByPostId(Long post_id) {
+		mybatis.delete("PostAttachment.dedeletePostAttachByPostId", post_id);
+	}
+
+	public List<PostAttachmentDTO> selectPostAttachByPostId(Long post_id) {
+
+		// 첨부파일 목록 조회 시
+		List<PostAttachmentDTO> files = mybatis.selectList("PostAttachment.selectPostAttachByPostId", post_id);
+
+		for (PostAttachmentDTO file : files) { // 조회 시 전체 경로 완성
+			String path = file.getFile_path();
+
+			if (path != null && !path.startsWith("http")) {
+				file.setFile_path(
+						"https://storage.googleapis.com/"
+								+ bucketName
+								+ "/"
+								+ path
+						);
+			}
+		}
+
+		return files;
+
+	}
+
+	public void deletePostAttachById(Long id) {
+		mybatis.delete("PostAttachment.dedeletePostAttachById", id);
+	}
+
+	public PostAttachmentDTO selectPostAttachById(Long id) {
+		return mybatis.selectOne("PostAttachment.selectPostAttachById", id);
+	}
 
 }

@@ -51,5 +51,17 @@ public class uploadService {
                 objectName
         );
     }
+    
+    
+    public boolean deleteFile(String filePath) {
+
+        BlobId blobId =
+            BlobId.of(
+                bucketName,
+                filePath
+            );
+
+        return storage.delete(blobId);
+    }
 
 }
