@@ -71,6 +71,13 @@ public class BoardService {
 
 	public void deletePost(Long id) {
 		
+	    // 0. 게시글 조회 (본문 이미지 삭제를 위해)
+	    CommunityPostDTO post = postDAO.selectById(id);
+	    if (post != null) {
+	        // 본문 내 이미지 삭제
+	        uploadService.deleteImagesFromContent(post.getContent());
+	    }
+		
 	    // 1. 게시글 첨부파일 조회
 	    List<PostAttachmentDTO> attachments = fileDAO.selectPostAttachByPostId(id);
 

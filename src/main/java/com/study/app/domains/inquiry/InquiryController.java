@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +47,29 @@ public class InquiryController {
 	public ResponseEntity<InquiryDTO> inquiryDetail(@PathVariable Long inquiryId){
 		InquiryDTO dto = inqServ.inquiryDetail(inquiryId);
 		return ResponseEntity.ok(dto);
+	}
+	
+	@org.springframework.web.bind.annotation.PutMapping("/update/{inquiryId}")
+	public ResponseEntity<String> updateInquiry(@PathVariable Long inquiryId, @ModelAttribute InquiryDTO dto) {
+		try {
+			inqServ.updateInquiry(inquiryId, dto);
+			return ResponseEntity.ok("문의가 수정되었습니다.");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("수정 중 오류 발생: " + e.getMessage());
+		}
+	}
+	
+	@DeleteMapping("/delete/{inquiryId}")
+	public ResponseEntity<String> deleteInquiry(@PathVariable Long inquiryId, String memberId) {
+		try {
+			inqServ.deleteInquiry(inquiryId, memberId);
+			return ResponseEntity.ok("문의가 삭제되었습니다.");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("삭제 중 오류 발생: " + e.getMessage());
+		}
 	}
 	
 }

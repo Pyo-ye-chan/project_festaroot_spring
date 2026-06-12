@@ -61,4 +61,33 @@
 	<select id="inquiryDetail" resultType="com.study.app.domains.inquiry.dto.InquiryDTO">
 		SELECT * FROM USER_INQUIRY WHERE INQUIRY_ID = #{INQUIRY_ID}
 	</select>
+
+    <!-- 문의글 단건 조회 (추가) -->
+    <select id="selectInquiryById" parameterType="long" resultType="com.study.app.domains.inquiry.dto.InquiryDTO">
+        SELECT * FROM User_inquiry WHERE inquiry_id = #{inquiry_id}
+    </select>
+
+    <!-- 특정 문의의 첨부파일 리스트 조회 -->
+    <select id="selectAttachmentsByInquiryId" parameterType="long" resultType="com.study.app.domains.inquiry.dto.InquiryAttachmentDTO">
+        SELECT * FROM Inquiry_attachment WHERE inquiry_id = #{inquiry_id}
+    </select>
+
+    <!-- 첨부파일 DB 정보 삭제 -->
+    <delete id="deleteAttachmentsByInquiryId" parameterType="long">
+        DELETE FROM Inquiry_attachment WHERE inquiry_id = #{inquiry_id}
+    </delete>
+
+    <!-- 문의 본문 삭제 -->
+    <delete id="deleteInquiry" parameterType="long">
+        DELETE FROM User_inquiry WHERE inquiry_id = #{inquiry_id}
+    </delete>
+
+    <!-- 문의글 수정 -->
+    <update id="updateInquiry" parameterType="com.study.app.domains.inquiry.dto.InquiryDTO">
+        UPDATE User_inquiry
+        SET category = #{category},
+            title = #{title},
+            content = #{content}
+        WHERE inquiry_id = #{inquiry_id}
+    </update>
 </mapper>

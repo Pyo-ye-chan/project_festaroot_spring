@@ -16,9 +16,16 @@ public class InquiryDTO {
 	private LocalDate created_at;
 	
 	private List<MultipartFile> files;
+	private List<InquiryAttachmentDTO> attachments;
 	
-	
-	
+	public List<InquiryAttachmentDTO> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<InquiryAttachmentDTO> attachments) {
+		this.attachments = attachments;
+	}
+
 	public List<MultipartFile> getFiles() {
 		return files;
 	}
