@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.study.app.domains.inquiry.dto.InquiryAttachmentDTO;
 import com.study.app.domains.inquiry.dto.InquiryDTO;
-import com.study.app.domains.storage.uploadService;
+import com.study.app.domains.storage.UploadService;
 
 @Service
 public class InquiryService {
@@ -20,7 +20,7 @@ public class InquiryService {
     private InquiryDAO inquiryDAO;
 
     @Autowired
-    private uploadService uploadService;
+    private UploadService uploadService;
 
     /**
      * 문의 등록 및 파일 업로드 처리

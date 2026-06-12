@@ -10,7 +10,7 @@ import com.study.app.domains.board.dao.FileDAO;
 import com.study.app.domains.board.dao.PostDAO;
 import com.study.app.domains.board.dto.CommunityPostDTO;
 import com.study.app.domains.board.dto.PostAttachmentDTO;
-import com.study.app.domains.storage.uploadService;
+import com.study.app.domains.storage.UploadService;
 
 @Service
 public class BoardService {
@@ -22,7 +22,7 @@ public class BoardService {
 	private FileDAO fileDAO;
 	
 	@Autowired
-	private uploadService uploadService;
+	private UploadService uploadService;
 
 	public void addPost(CommunityPostDTO dto, List<MultipartFile> files) {
 		postDAO.insertPost(dto);

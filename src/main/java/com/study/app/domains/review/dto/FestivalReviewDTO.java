@@ -2,9 +2,9 @@ package com.study.app.domains.review.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class FestivalReviewDTO {
-	
 
     private Long review_id;
     private Long content_id;
@@ -22,11 +22,15 @@ public class FestivalReviewDTO {
 
     private String is_deleted;
 
+    // 추가 조회용
+    private String nickname;
+    private List<FestivalReviewImageDTO> images;
+
     public FestivalReviewDTO() {}
 
 	public FestivalReviewDTO(Long review_id, Long content_id, String member_id, Double rating, String content,
 			LocalDate visit_date, Long report_count, LocalDateTime created_at, LocalDateTime updated_at,
-			String is_deleted) {
+			String is_deleted, String nickname, List<FestivalReviewImageDTO> images) {
 		super();
 		this.review_id = review_id;
 		this.content_id = content_id;
@@ -38,6 +42,8 @@ public class FestivalReviewDTO {
 		this.created_at = created_at;
 		this.updated_at = updated_at;
 		this.is_deleted = is_deleted;
+		this.nickname = nickname;
+		this.images = images;
 	}
 
 	public Long getReview_id() {
@@ -119,7 +125,22 @@ public class FestivalReviewDTO {
 	public void setIs_deleted(String is_deleted) {
 		this.is_deleted = is_deleted;
 	}
-    
+
+	public String getNickname() {
+		return nickname;
+	}
+
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public List<FestivalReviewImageDTO> getImages() {
+		return images;
+	}
+
+	public void setImages(List<FestivalReviewImageDTO> images) {
+		this.images = images;
+	}
     
 
 }

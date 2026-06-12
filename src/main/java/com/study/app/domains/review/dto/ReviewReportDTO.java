@@ -6,8 +6,8 @@ public class ReviewReportDTO {
 	
     private Long report_id;
     private Long review_id;
-    private String member_id;
 
+    private String member_id;
     private String reason;
 
     private LocalDateTime created_at;
@@ -62,7 +62,7 @@ public class ReviewReportDTO {
 	public void setCreated_at(LocalDateTime created_at) {
 		this.created_at = created_at;
 	}
+    
+    
 
-    
-    
 }

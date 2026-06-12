@@ -2,17 +2,18 @@ package com.study.app.domains.review.dto;
 
 import java.time.LocalDateTime;
 
-public class ReviewImageDTO {
+public class FestivalReviewImageDTO {
 	
     private Long image_id;
     private Long review_id;
+
     private String image_url;
 
     private LocalDateTime created_at;
 
-    public ReviewImageDTO() {}
+    public FestivalReviewImageDTO() {}
 
-	public ReviewImageDTO(Long image_id, Long review_id, String image_url, LocalDateTime created_at) {
+	public FestivalReviewImageDTO(Long image_id, Long review_id, String image_url, LocalDateTime created_at) {
 		super();
 		this.image_id = image_id;
 		this.review_id = review_id;
@@ -51,8 +52,6 @@ public class ReviewImageDTO {
 	public void setCreated_at(LocalDateTime created_at) {
 		this.created_at = created_at;
 	}
-    
-    
     
     
 

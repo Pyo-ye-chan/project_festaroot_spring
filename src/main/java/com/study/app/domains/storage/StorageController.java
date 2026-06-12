@@ -33,7 +33,7 @@ public class StorageController {
 	private Storage storage;
 	
     @Autowired
-    private uploadService uploadService;
+    private UploadService uploadService;
     
     @Value("${gcp.bucket-name}")
     private String bucketName;

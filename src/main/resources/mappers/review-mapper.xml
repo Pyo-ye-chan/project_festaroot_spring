@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Review">
+
+    <select id="selectReviews" resultType="com.study.app.domains.review.dto.FestivalReviewDTO">
+        SELECT
+            fr.review_id,
+            fr.content_id,
+            fr.member_id,
+            fr.rating,
+            fr.content,
+            fr.visit_date,
+            NVL(fr.report_count, 0) AS report_count,
+            fr.created_at,
+            fr.updated_at,
+            fr.is_deleted,
+            m.nickname
+        FROM festival_review fr
+        LEFT JOIN member m
+            ON fr.member_id = m.member_id
+        WHERE fr.content_id = #{content_id}
+          AND NVL(fr.is_deleted, 'N') = 'N'
+        <choose>
+            <when test="sortType == '별점순'">
+                ORDER BY fr.rating DESC, fr.created_at DESC
+            </when>
+            <otherwise>
+                ORDER BY fr.created_at DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectReviewById" resultType="com.study.app.domains.review.dto.FestivalReviewDTO">
+        SELECT
+            review_id,
+            content_id,
+            member_id,
+            rating,
+            content,
+            visit_date,
+            NVL(report_count, 0) AS report_count,
+            created_at,
+            updated_at,
+            is_deleted
+        FROM festival_review
+        WHERE review_id = #{review_id}
+    </select>
+
+    <insert id="insertReview" parameterType="com.study.app.domains.review.dto.FestivalReviewDTO">
+        <selectKey keyProperty="review_id" resultType="Long" order="BEFORE">
+            SELECT festival_review_seq.NEXTVAL FROM dual
+        </selectKey>
+
+        INSERT INTO festival_review (
+            review_id,
+            content_id,
+            member_id,
+            rating,
+            content,
+            visit_date,
+            report_count,
+            created_at,
+            is_deleted
+        ) VALUES (
+            #{review_id},
+            #{content_id},
+            #{member_id},
+            #{rating},
+            #{content, jdbcType=CLOB},
+            #{visit_date},
+            0,
+            SYSDATE,
+            'N'
+        )
+    </insert>
+
+    <update id="updateReview" parameterType="com.study.app.domains.review.dto.FestivalReviewDTO">
+        UPDATE festival_review
+        SET
+            rating = #{rating},
+            content = #{content, jdbcType=CLOB},
+            visit_date = #{visit_date},
+            updated_at = SYSDATE
+        WHERE review_id = #{review_id}
+          AND member_id = #{member_id}
+          AND NVL(is_deleted, 'N') = 'N'
+    </update>
+
+    <update id="deleteReview">
+        UPDATE festival_review
+        SET
+            is_deleted = 'Y',
+            updated_at = SYSDATE
+        WHERE review_id = #{review_id}
+          AND member_id = #{member_id}
+    </update>
+
+    <select id="selectReviewImages" resultType="com.study.app.domains.review.dto.FestivalReviewImageDTO">
+        SELECT
+            image_id,
+            review_id,
+            image_url,
+            created_at
+        FROM festival_review_image
+        WHERE review_id = #{review_id}
+        ORDER BY image_id ASC
+    </select>
+
+    <insert id="insertReviewImage" parameterType="com.study.app.domains.review.dto.FestivalReviewImageDTO">
+        <selectKey keyProperty="image_id" resultType="Long" order="BEFORE">
+            SELECT festival_review_image_seq.NEXTVAL FROM dual
+        </selectKey>
+
+        INSERT INTO festival_review_image (
+            image_id,
+            review_id,
+            image_url,
+            created_at
+        ) VALUES (
+            #{image_id},
+            #{review_id},
+            #{image_url},
+            SYSDATE
+        )
+    </insert>
+
+    <delete id="deleteReviewImages">
+        DELETE FROM festival_review_image
+        WHERE review_id = #{review_id}
+    </delete>
+
+    <select id="countReportByMember" resultType="int">
+        SELECT COUNT(*)
+        FROM review_report
+        WHERE review_id = #{review_id}
+          AND member_id = #{member_id}
+    </select>
+
+    <insert id="insertReport" parameterType="com.study.app.domains.review.dto.ReviewReportDTO">
+        <selectKey keyProperty="report_id" resultType="Long" order="BEFORE">
+            SELECT review_report_seq.NEXTVAL FROM dual
+        </selectKey>
+
+        INSERT INTO review_report (
+            report_id,
+            review_id,
+            member_id,
+            reason,
+            created_at
+        ) VALUES (
+            #{report_id},
+            #{review_id},
+            #{member_id},
+            #{reason},
+            SYSDATE
+        )
+    </insert>
+
+    <update id="increaseReportCount">
+        UPDATE festival_review
+        SET report_count = NVL(report_count, 0) + 1
+        WHERE review_id = #{review_id}
+    </update>
+</mapper>

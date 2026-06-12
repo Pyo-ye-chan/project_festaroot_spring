@@ -26,7 +26,7 @@ import com.study.app.domains.member.dto.InterestRegionDTO;
 import com.study.app.domains.member.dto.InterestThemeDTO;
 import com.study.app.domains.member.dto.MemberDTO;
 import com.study.app.domains.member.dto.MemberProfileDTO;
-import com.study.app.domains.storage.uploadService;
+import com.study.app.domains.storage.UploadService;
 import com.study.app.utils.JWTUtil;
 
 @Service
@@ -41,7 +41,7 @@ public class MemberService {
     private com.study.app.domains.activity.UserActivityLogDAO userActivityLogDAO;
 
     @Autowired
-    private uploadService uploadService;
+    private UploadService uploadService;
 
     @Autowired
     private JWTUtil jwtUtil;
