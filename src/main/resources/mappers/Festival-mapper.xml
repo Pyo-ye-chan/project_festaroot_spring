@@ -411,6 +411,8 @@
 	    SELECT * FROM (
 	        SELECT * FROM festival_info
 	        WHERE NVL(is_visible, 'Y') = 'Y'
+	          AND REPLACE(event_end_date, '-', '') >= TO_CHAR(SYSDATE, 'YYYYMMDD')
+	          AND REPLACE(event_start_date, '-', '') &lt;= TO_CHAR(SYSDATE, 'YYYYMMDD')
 	        ORDER BY DBMS_RANDOM.VALUE
 	    ) WHERE ROWNUM = 1
 	</select>
